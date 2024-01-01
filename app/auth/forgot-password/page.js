@@ -5,12 +5,11 @@ import Link from "next/link";
 import { useEffect, useState } from "react";
 import validator from 'validator';
 import 'material-icons/iconfont/material-icons.css';
-import { LOGIN_URL } from "@/components/constants";
+import { FORGOT_PASSWORD_URL } from "@/components/constants";
 import secureLocalStorage from "react-secure-storage";
-import { hashPassword } from "@/components/hashData";
 import { useRouter } from "next/navigation";
 
-export default function LoginScreen() {
+export default function FPScreen() {
     // For The AlertDialogModal
     const [isOpen, setIsOpen] = useState(false);
     const [title, setTitle] = useState('');
@@ -28,9 +27,7 @@ export default function LoginScreen() {
     const router = useRouter();
 
     const [userEmail, setUserEmail] = useState('');
-    const [userPassword, setUserPassword] = useState('');
 
-    const isValidPassword = userPassword.length >= 8;
     const isValidEmail = validator.isEmail(userEmail);
 
     const [buttonState, setButtonState] = useState(true);
@@ -44,8 +41,8 @@ export default function LoginScreen() {
     const handleLogin = async (e) => {
         e.preventDefault();
 
-        if (!isValidEmail || !isValidPassword) {
-            buildDialog('Invalid Email/Password', 'Please enter a valid EmailID/Password to continue', 'Okay');
+        if (!isValidEmail) {
+            buildDialog('Invalid Email', 'Please enter a valid EmailID to continue', 'Okay');
             openModal();
             return;
         }
@@ -54,14 +51,13 @@ export default function LoginScreen() {
 
         try {
 
-            const response = await fetch(LOGIN_URL, {
+            const response = await fetch(FORGOT_PASSWORD_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
                     userEmail: userEmail,
-                    userPassword: hashPassword(userPassword)
                 })
             });
 
@@ -70,28 +66,18 @@ export default function LoginScreen() {
 
                 secureLocalStorage.clear();
 
-                secureLocalStorage.setItem('pragathi-t', data["token"]);
+                secureLocalStorage.setItem('pragathi-ft', data["token"]);
                 secureLocalStorage.setItem('pragathi-ue', userEmail);
-                secureLocalStorage.setItem('pragathi-fn', data["userFullName"]);
-                secureLocalStorage.setItem('pragathi-ur', data["userRoleId"]);
-                secureLocalStorage.setItem('pragathi-ua', data["userAccountStatus"]);
 
-                if (data["userRoleId"] === 1) {
-                    router.push('/admin');
-                } else if (data["userRoleId"] === 2) {
-                    router.push('/user');
-                } else {
-                    buildDialog('Error', 'Something went wrong, please try again later', 'Okay');
-                    openModal();
-                }
+                router.push('/auth/forgot-password/verify');
 
                 return;
             } else if (response.status === 400) {
-                buildDialog('Invalid Email/Password', 'Please enter a valid EmailID/Password to continue', 'Okay');
+                buildDialog('Invalid Email/Password', 'Please enter a valid EmailID to continue', 'Okay');
                 openModal();
                 return;
             } else if (response.status === 401) {
-                buildDialog('Invalid Credentials', 'Please enter your valid EmailID/Password to continue', 'Okay');
+                buildDialog('Invalid Credentials', 'Please enter your valid EmailID to continue', 'Okay');
                 openModal();
                 return;
             }
@@ -108,7 +94,6 @@ export default function LoginScreen() {
     useEffect(() => {
         secureLocalStorage.clear();
         setUserEmail('');
-        setUserPassword('');
     }, []);
 
     return (
@@ -129,7 +114,7 @@ export default function LoginScreen() {
 
                 <div className="mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md">
                     <div className='flex flex-row justify-center'>
-                        <h1 className='px-4 py-4 w-full text-2xl font-semibold text-center text-black'>Sign In</h1>
+                        <h1 className='px-4 py-4 w-full text-2xl font-semibold text-center text-black'>Forgot Password</h1>
                     </div>
                     <hr className='border-gray-300 w-full' />
                 </div>
@@ -154,38 +139,10 @@ export default function LoginScreen() {
                         </div>
 
                         <div>
-                            <div className="flex items-center justify-between">
-                                <label className="block text-md font-medium leading-6 text-black">
-                                    Password
-                                </label>
-                                <div className="text-md">
-                                    <Link replace={true} href={"/auth/forgot-password"} className="font-medium text-blue-600 hover:underline">
-                                        Forgot password?
-                                    </Link>
-                                </div>
-                            </div>
-                            <div className="mt-2">
-                                <input
-                                    type="password"
-                                    autoComplete="current-password"
-                                    placeholder='Enter your Password'
-                                    className={"block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" + (!isValidPassword && userPassword ? ' ring-red-500' : isValidPassword && userPassword ? ' ring-green-500' : ' ring-bGray')}
-                                    onChange={(e) => setUserPassword(e.target.value)}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <p className="mt-10 text-center text-md text-gray-500">
-                            {"Don't have an account? "}
-                            <Link className="font-medium leading-6 text-blue-600 hover:underline" href="/auth/register">Register</Link>
-                        </p>
-
-                        <div>
                             <input
-                                value="Sign In"
+                                value="Verify Email and Reset Password"
                                 type="submit"
-                                disabled={(!isValidEmail || !isValidPassword) && buttonState}
+                                disabled={(!isValidEmail) && buttonState}
                                 className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
                         </div>
                     </form>

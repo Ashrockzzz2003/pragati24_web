@@ -75,6 +75,9 @@ export default function RegisterScreen() {
 
             if (response.status === 200) {
                 const data = await response.json();
+                
+                secureLocalStorage.clear();
+
                 secureLocalStorage.setItem('pragathi-rt', data["token"]);
                 secureLocalStorage.setItem('pragathi-ue', userEmail);
 

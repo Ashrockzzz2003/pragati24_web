@@ -4,12 +4,12 @@ import DialogModal from "@/components/DialogModal";
 import { useEffect, useState } from "react";
 import validator from 'validator';
 import 'material-icons/iconfont/material-icons.css';
-import { REGISTER_VERIFY_URL } from "@/components/constants";
+import { FORGOT_PASSWORD_VERIFY_URL } from "@/components/constants";
 import secureLocalStorage from "react-secure-storage";
 import { hashPassword } from "@/components/hashData";
 import { useRouter } from "next/navigation";
 
-export default function RegisterVerifyScreen() {
+export default function FPVerifyScreen() {
     // For The AlertDialogModal
     const [isOpen, setIsOpen] = useState(false);
     const [title, setTitle] = useState('');
@@ -28,6 +28,10 @@ export default function RegisterVerifyScreen() {
 
     const [registerEmail, setUserEmail] = useState('');
     const [userOtp, setUserOtp] = useState(new Array(6).fill(""));
+    const [userPassword, setUserPassword] = useState('');
+    const [userConfirmPassword, setUserConfirmPassword] = useState('');
+
+    const isValidPassword = (userPassword.length >= 8 && userConfirmPassword.length >= 8 && userPassword === userConfirmPassword);
     const isValidOtp = validator.isNumeric(userOtp.join('')) && (userOtp.join('')).length === 6;
 
     const [buttonState, setButtonState] = useState(true);
@@ -38,11 +42,11 @@ export default function RegisterVerifyScreen() {
         setButtonLabel(buttonLabel);
     }
 
-    const handleRegisterVerify = async (e) => {
+    const handleForgotPasswordVerify = async (e) => {
         e.preventDefault();
 
-        if (!isValidOtp) {
-            buildDialog('Invalid Details', 'Please enter a valid 6-digit OTP', 'Okay');
+        if (!isValidPassword || !isValidOtp) {
+            buildDialog('Invalid Details', 'Please enter a valid 6-digit OTP or a valid password(At Least Eight Characters).', 'Okay');
             openModal();
             return;
         }
@@ -51,24 +55,26 @@ export default function RegisterVerifyScreen() {
 
         try {
 
-            const rt = secureLocalStorage.getItem('pragathi-rt');
+            const ft = secureLocalStorage.getItem('pragathi-ft');
 
-            const response = await fetch(REGISTER_VERIFY_URL, {
+            const response = await fetch(FORGOT_PASSWORD_VERIFY_URL, {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json',
-                    'Authorization': 'Bearer ' + rt,
+                    'Authorization': 'Bearer ' + ft,
                 },
                 body: JSON.stringify({
                     userOtp: hashPassword(userOtp.join('')),
+                    newUserPassword: hashPassword(userPassword),
                 })
             });
 
             if (response.status === 200) {
                 const data = await response.json();
+                
                 secureLocalStorage.clear();
 
-                buildDialog('Registration Successful', 'Login to continue!', 'Okay');
+                buildDialog('Password Reset Successful', 'Login to continue!', 'Okay');
                 openModal();
 
                 setTimeout(() => {
@@ -100,6 +106,8 @@ export default function RegisterVerifyScreen() {
     useEffect(() => {
         setUserEmail(secureLocalStorage.getItem('pragathi-ue'));
         setUserOtp(new Array(6).fill(""));
+        setUserPassword('');
+        setUserConfirmPassword('');
     }, []);
 
     return (
@@ -120,13 +128,13 @@ export default function RegisterVerifyScreen() {
 
                 <div className="mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md">
                     <div className='flex flex-row justify-center'>
-                        <h1 className='px-4 py-4 w-full text-2xl font-semibold text-center text-black'>Register</h1>
+                        <h1 className='px-4 py-4 w-full text-2xl font-semibold text-center text-black'>Verify OTP and Reset Password</h1>
                     </div>
                     <hr className='border-gray-300 w-full' />
                 </div>
 
                 <div className="mt-10 mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md px-6 pb-8 lg:px-8 ">
-                    <form className="space-y-6" onSubmit={handleRegisterVerify}>
+                    <form className="space-y-6" onSubmit={handleForgotPasswordVerify}>
                         {/* OTP input */}
                         <div>
                             <label htmlFor="otp" className="block text-lg font-medium text-gray-700">
@@ -167,10 +175,46 @@ export default function RegisterVerifyScreen() {
                         </div>
 
                         <div>
+                            <div className="flex items-center justify-between">
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    New Password
+                                </label>
+                            </div>
+                            <div className="mt-2">
+                                <input
+                                    type="password"
+                                    autoComplete="current-password"
+                                    placeholder='Enter your Password'
+                                    className={"block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" + (!isValidPassword && userPassword ? ' ring-red-500' : isValidPassword && userPassword ? ' ring-green-500' : ' ring-bGray')}
+                                    onChange={(e) => setUserPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <div className="flex items-center justify-between">
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    Enter New Password Again
+                                </label>
+                            </div>
+                            <div className="mt-2">
+                                <input
+                                    type="password"
+                                    autoComplete="current-password"
+                                    placeholder='Re-Enter your Password'
+                                    className={"block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" + (!isValidPassword && userConfirmPassword ? ' ring-red-500' : isValidPassword && userConfirmPassword ? ' ring-green-500' : ' ring-bGray')}
+                                    onChange={(e) => setUserConfirmPassword(e.target.value)}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
                             <input
-                                value="Verify"
+                                value="Reset Password"
                                 type="submit"
-                                disabled={(!isValidOtp) && buttonState}
+                                disabled={(!isValidOtp || !isValidPassword) && buttonState}
                                 className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
                         </div>
                     </form>
