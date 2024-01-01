@@ -9,10 +9,13 @@ const REGISTER_VERIFY_URL = `${AUTH_URL}/register/verify`;
 const FORGOT_PASSWORD_URL = `${AUTH_URL}/forgot-password`;
 const FORGOT_PASSWORD_VERIFY_URL = `${AUTH_URL}/forgot-password/verify`;
 
+const GET_EVENTS_URL = `${USER_URL}/event/all`;
+
 export {
     LOGIN_URL,
     REGISTER_URL,
     REGISTER_VERIFY_URL,
     FORGOT_PASSWORD_URL,
     FORGOT_PASSWORD_VERIFY_URL,
+    GET_EVENTS_URL
 };
