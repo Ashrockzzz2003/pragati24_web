@@ -2,11 +2,13 @@
 
 import DialogModal from "@/components/DialogModal";
 import EventCard from "@/components/EventCard";
-import { GET_EVENTS_URL } from "@/components/constants";
+import { GET_EVENTS_URL, REGISTER_EVENT_URL } from "@/components/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
+import secureLocalStorage from "react-secure-storage";
 
 export default function RegisterEventScreen() {
+
     // For The AlertDialogModal
     const [isOpen, setIsOpen] = useState(false);
     const [title, setTitle] = useState('');
@@ -33,33 +35,68 @@ export default function RegisterEventScreen() {
     const [selectedEvents, setSelectedEvents] = useState([]);
     const [filteredEventsData, setFilteredEventsData] = useState([]);
 
-    const [selectedEventIds, setSelectedEventIds] = useState([]);
+    const [isSelected, setIsSelected] = useState({});
+    const [totalAmount, setTotalAmount] = useState(0);
 
+    // Check if Logged In
     useEffect(() => {
         fetch(GET_EVENTS_URL, {
             method: 'GET',
             headers: {
-                'Content-Type': 'application/json'
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${secureLocalStorage.getItem('pragathi-t')}`
             }
-        }).then(res => res.json())
+        }).then(res => {
+            if (res.status === 401) {
+                buildDialog('Error', 'You are not logged in!\nPlease Login to continue.', 'Okay');
+                openModal();
+                setTimeout(() => {
+                    router.push('/auth/login');
+                }, 3000);
+            } else if (res.status === 500) {
+                buildDialog('Error', 'Something went wrong!', 'OK');
+                openModal();
+
+                setTimeout(() => {
+                    router.push('/auth/login');
+                }, 3000);
+            } else if (res.status === 200) {
+                return res.json();
+            } else {
+                alert('Something went wrong');
+                router.push('/login');
+            }
+        })
             .then(data => {
                 setEventsData(data["data"]);
                 setFilteredEventsData(data["data"]);
                 setSelectedEvents([]);
+
+                let temp = {};
+                data["data"].forEach((eventD) => {
+                    temp[eventD["eventId"]] = false;
+                });
+
+                setIsSelected(temp);
+
+                if (secureLocalStorage.getItem('pragathi-ua') === '0') {
+                    setTotalAmount(60);
+                }
             })
             .catch(err => {
                 console.log(err);
                 buildDialog('Error', 'Something went wrong!', 'OK');
-            });
-    }, []);
+                openModal();
+            })
+    }, [router]);
 
     useEffect(() => {
         if (eventsData.length) {
             setFilteredEventsData(eventsData.filter((eventD) => {
-                return !selectedEventIds.includes(eventD["eventId"]);
+                return isSelected[eventD["eventId"]] === false;
             }));
         }
-    }, [selectedEventIds, eventsData]);
+    }, [isSelected, eventsData]);
 
     const registerToEvent = (eventId, eventName, eventPrice, priceMeasureType, minSize, maxSize) => {
         if (minSize === maxSize) {
@@ -72,7 +109,14 @@ export default function RegisterEventScreen() {
             });
 
             setSelectedEvents(selectedEvents);
-            setSelectedEventIds(selectedEventIds.concat(eventId));
+            setIsSelected({ ...isSelected, [eventId]: true });
+
+            if (priceMeasureType === '1') {
+                setTotalAmount(totalAmount + eventPrice);
+            } else {
+                setTotalAmount(totalAmount + eventPrice * minSize);
+            }
+
         } else {
             // prompt for team size
             let teamSize = prompt("Enter Number of members in your team", minSize);
@@ -88,13 +132,61 @@ export default function RegisterEventScreen() {
                 });
 
                 setSelectedEvents(selectedEvents);
-                setSelectedEventIds(selectedEventIds.concat(eventId));
+                setIsSelected({ ...isSelected, [eventId]: true });
+
+                if (priceMeasureType === '1') {
+                    setTotalAmount(totalAmount + eventPrice);
+                } else {
+                    setTotalAmount(totalAmount + eventPrice * teamSize);
+                }
+
             } else {
                 buildDialog('Error', 'Invalid Team Size', 'OK');
                 openModal();
             }
         }
     };
+
+    const removeEvent = (eventId, eventPrice) => {
+        setTotalAmount(totalAmount - eventPrice);
+
+        let temp = selectedEvents.filter((eventD) => {
+            return eventD["eventId"] !== eventId;
+        });
+
+        setSelectedEvents(temp);
+        setIsSelected({ ...isSelected, [eventId]: false });
+    }
+
+
+    const moveToTransaction = async () => {
+        // main multi dimensional array
+        let finalToTransactionArray = [];
+
+        // make array. (eventId, totalMembers, totalPrice)
+        selectedEvents.forEach((eventD) => {
+            finalToTransactionArray.push([eventD["eventId"], eventD["totalMembers"], (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])]);
+        });
+
+        // console.log(finalToTransactionArray);
+
+        // make api call to our server to get hash
+        const response = await fetch(REGISTER_EVENT_URL, {
+            method: 'POST',
+            headers: {
+                "Content-Type": "application/json",
+                "Authorization": `Bearer ${secureLocalStorage.getItem('pragathi-t')}`
+            },
+            body: JSON.stringify({
+                "eventList": finalToTransactionArray
+            })
+        });
+
+        if (response.status === 200) {
+            const data = await response.json();
+            console.log(data);
+        }
+    }
 
 
     return (
@@ -120,21 +212,71 @@ export default function RegisterEventScreen() {
                             <tr className="bg-black text-white bg-opacity-90 backdrop-blur-xl">
                                 <th className="px-2 py-1 rounded-tl-2xl border-black">Event</th>
                                 <th className="px-2 py-1 border-b-black">Members</th>
-                                <th className="px-2 py-1 border-b-black rounded-tr-2xl">Cost</th>
+                                <th className="px-2 py-1 border-b-black">Cost</th>
+                                <th className="px-2 py-1 border-b-black rounded-tr-2xl">Action</th>
                             </tr>
                         </thead>
                         <tbody>
+                            {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
+                                <tr className="bg-white">
+                                    <td className={"border border-gray-200 px-2 py-1"} >{"Registration Fee"}</td>
+                                    <td className="border border-gray-200 px-2 py-1">{1}</td>
+                                    <td className={"border border-gray-200 px-2 py-1"} >{"₹ 60"}</td>
+                                    <td className={"border border-gray-200 px-2 py-1"} >
+                                        -
+                                    </td>
+                                </tr>
+                            ) : null}
                             {selectedEvents.map((eventD, index) => {
                                 return (
                                     <tr key={index} className="bg-white">
                                         <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-bl-2xl" : "")} >{eventD["eventName"]}</td>
                                         <td className="border border-gray-200 px-2 py-1">{eventD["totalMembers"]}</td>
-                                        <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-br-2xl" : "")} >{"₹ " + (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"]*eventD["totalMembers"])}</td>
+                                        <td className={"border border-gray-200 px-2 py-1"} >{"₹ " + (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])}</td>
+                                        <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-br-2xl" : "")} >
+                                            <div onClick={() => {
+                                                removeEvent(eventD["eventId"], (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"]));
+                                            }} className="bg-red-100 text-[#3d0f0f] flex flex-row rounded-lg py-1 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit mr-2">
+                                                <span className="material-icons">remove_circle</span>
+                                            </div>
+                                        </td>
                                     </tr>
                                 );
                             })}
                         </tbody>
                     </table>
+
+                    <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto">
+                        <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
+                            <p className="text-xl font-medium">{"Total Amount " + "₹ " + totalAmount}</p>
+                        </div>
+                        <div className="flex flex-row justify-center items-center gap-4">
+                            <button onClick={() => {
+                                confirm("Are you sure you want to register to these events?") ? moveToTransaction() : null;
+                            }} className="bg-green-100 text-[#0f3d0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
+                                <span className="material-icons">check_circle</span>
+                                <span>Confirm</span>
+                            </button>
+                            <button onClick={() => {
+                                setSelectedEvents([]);
+                                let temp = {};
+                                eventsData.forEach((eventD) => {
+                                    temp[eventD["eventId"]] = false;
+                                });
+
+                                setIsSelected(temp);
+
+                                if (secureLocalStorage.getItem('pragathi-ua') === '0') {
+                                    setTotalAmount(60);
+                                } else {
+                                    setTotalAmount(0);
+                                }
+                            }} className="bg-red-100 text-[#3d0f0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
+                                <span className="material-icons">cancel</span>
+                                <span>Cancel</span>
+                            </button>
+                        </div>
+                    </div>
                 </>
             ) : null}
 
@@ -142,7 +284,7 @@ export default function RegisterEventScreen() {
             <div className="relative mx-6 my-8 py-2 flex flex-wrap justify-center gap-4 items-center md:mx-16">
                 {filteredEventsData.length === 0 ? (
                     <div className='mx-auto'>
-                        <p className="p-8 text-center text-lime-100">Loading...</p>
+                        <p className="p-8 text-center text-lime-100">Loading ... </p>
                     </div>
                 ) : (
                     filteredEventsData.map((eventD, index) => {
@@ -163,7 +305,7 @@ export default function RegisterEventScreen() {
                                 priceMeasureType={eventD["priceMeasureType"]}
                                 buildDialog={buildDialog}
                                 openModal={openModal}
-                                hasRegistered={false}
+                                hasRegistered={eventD["isRegistered"]}
                                 key={index}
                                 registerToEvent={registerToEvent}
                             />

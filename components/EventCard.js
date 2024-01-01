@@ -25,7 +25,7 @@ export default function EventCard({
 }) {
     // For The AlertDialogModal
 
-    return <div className="border flex flex-col rounded-xl backdrop-blur-xl bg-gray-50 w-72">
+    return <div className={"border flex flex-col rounded-xl backdrop-blur-xl bg-gray-50 w-72"} >
         <div>
             <Image src={`/event/${eventId}.png`} width={300} height={300} className="rounded-t-xl max-h-100" alt={eventId + "_im"} />
         </div>
@@ -48,11 +48,18 @@ export default function EventCard({
                     </div>
                 </div>
             </div>
-            {hasRegistered === true ? (
-                <div className="bg-gray-100 text-[#143d0f] flex flex-row rounded-lg py-6 px-4 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit mr-2">
+            {(hasRegistered === true) ? (
+                <div className="bg-gray-100 text-[#143d0f] flex flex-row rounded-lg py-6 px-4 justify-between items-center align-middle hover:bg-opacity-80 cursor-not-allowed h-fit mr-2">
                     <span className="material-icons">verified</span>
                 </div>
+            ) : noOfRegistrations >= maxRegistrationCount ? (
+                <div>
+                    <div className="bg-red-100 text-[#3d0f0f] flex flex-row rounded-lg py-6 px-4 justify-between items-center align-middle hover:bg-opacity-80 cursor-not-allowed h-fit mr-2">
+                        <span className="material-icons">block</span>
+                    </div>
+                </div>
             ) : (
+
                 <div onClick={() => {
                     registerToEvent(eventId, eventName, eventPrice, priceMeasureType, minSize, maxSize);
                 }} className="bg-blue-100 text-[#0f113d] flex flex-row rounded-lg py-6 px-4 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit mr-2">
@@ -63,6 +70,12 @@ export default function EventCard({
         <hr className="border-gray-300 w-full" />
         <div className="bg-green-100 text-[#0f3d0f] flex flex-row rounded-lg py-2 px-1 justify-between items-center hover:bg-opacity-80 cursor-pointer">
             <span className="material-icons">group</span>
+            {hasRegistered === true ? (
+                <p className="text-sm text-green-100 bg-[#0f3d0f] rounded-lg py-1 px-1">Registered</p>
+            ) : (noOfRegistrations >= maxRegistrationCount) ? (
+                <p className="text-sm text-red-100 bg-[#3d0f0f] rounded-lg py-1 px-1">Registrations Closed</p>
+            ) : null}
+
             {minSize === maxSize ? (
                 <p className="text-sm">{minSize + (minSize === 1 ? " member" : " members")}</p>
             ) : (
