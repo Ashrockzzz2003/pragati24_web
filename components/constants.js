@@ -1,7 +1,6 @@
 const BASE_URL = "http://localhost:5000/api";
 const AUTH_URL = `${BASE_URL}/auth`;
 const USER_URL = `${BASE_URL}/user`;
-const ADMIN_URL = `${BASE_URL}/admin`;
 
 const LOGIN_URL = `${AUTH_URL}/login`;
 const REGISTER_URL = `${AUTH_URL}/register`;
@@ -14,6 +13,7 @@ const REGISTER_EVENT_URL = `${USER_URL}/event/register`;
 
 const USER_PROFILE_URL = `${USER_URL}/profile`;
 const USER_EVENTS_URL = `${USER_URL}/profile/event`;
+const EDIT_PROFILE_URL = `${USER_URL}/profile/edit`;
 
 export {
     LOGIN_URL,
@@ -24,5 +24,6 @@ export {
     GET_EVENTS_URL,
     REGISTER_EVENT_URL,
     USER_PROFILE_URL,
-    USER_EVENTS_URL
+    USER_EVENTS_URL,
+    EDIT_PROFILE_URL,
 };

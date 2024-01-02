@@ -229,6 +229,7 @@ export default function RegisterEventScreen() {
 
             document.body.appendChild(payUForm);
 
+            secureLocalStorage.clear(); // logout before going to payU. This is to prevent user from going back to the registration page after paying.
             payUForm.submit();
         }
     }
@@ -236,151 +237,151 @@ export default function RegisterEventScreen() {
 
     return (
         <>
-        <NavBar />
-        <main className="h-full">
-            <div
-                className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
-                aria-hidden="true"
-            >
+            <NavBar />
+            <main className="h-full">
                 <div
-                    className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[64%] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#a8abce] to-[#a9afde] opacity-10"
-                    style={{
-                        clipPath:
-                            'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%, 45.2% 34.5%)',
-                    }}
-                />
-            </div>
-
-            {/* Info Box regarding mandatory registration fee of 60 rs */}
-            {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
-                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
-                    <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
-                        <p className="text-xl font-medium">{"Registration Fee"}</p>
-                        <p className="text-xl font-medium">{"₹ 60"}</p>
-                    </div>
-                    <p className="text-sm font-medium text-gray-700 max-w-[256px]">{"Note: You have to pay a mandatory registration fee of ₹ 60 to register to events."}</p>
+                    className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
+                    aria-hidden="true"
+                >
+                    <div
+                        className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[64%] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#a8abce] to-[#a9afde] opacity-10"
+                        style={{
+                            clipPath:
+                                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%, 45.2% 34.5%)',
+                        }}
+                    />
                 </div>
-            ) : null}
+
+                {/* Info Box regarding mandatory registration fee of 60 rs */}
+                {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
+                    <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
+                        <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
+                            <p className="text-xl font-medium">{"Registration Fee"}</p>
+                            <p className="text-xl font-medium">{"₹ 60"}</p>
+                        </div>
+                        <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"Note: You have to pay a mandatory registration fee of ₹ 60 to register to events."}</p>
+                    </div>
+                ) : null}
 
 
-            {selectedEvents.length > 0 ? (
-                <>
-                    <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Selected Events to Register</h1>
-                    <table className="max-w-9/12 ml-auto mr-auto my-4 rounded-2xl backdrop-blur-2xl bg-opacity-30 text-center text-md border-black border-separate border-spacing-0 border-solid">
-                        <thead className="border-0 text-lg font-medium">
-                            <tr className="bg-black text-white bg-opacity-90 backdrop-blur-xl">
-                                <th className="px-2 py-1 rounded-tl-2xl border-black">Event</th>
-                                <th className="px-2 py-1 border-b-black">Members</th>
-                                <th className="px-2 py-1 border-b-black">Cost</th>
-                                <th className="px-2 py-1 border-b-black rounded-tr-2xl">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
-                                <tr className="bg-white">
-                                    <td className={"border border-gray-200 px-2 py-1"} >{"Registration Fee"}</td>
-                                    <td className="border border-gray-200 px-2 py-1">{1}</td>
-                                    <td className={"border border-gray-200 px-2 py-1"} >{"₹ 60"}</td>
-                                    <td className={"border border-gray-200 px-2 py-1"} >
-                                        -
-                                    </td>
+                {selectedEvents.length > 0 ? (
+                    <>
+                        <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Selected Events to Register</h1>
+                        <table className="max-w-9/12 ml-auto mr-auto my-4 rounded-2xl backdrop-blur-2xl bg-opacity-30 text-center text-md border-black border-separate border-spacing-0 border-solid">
+                            <thead className="border-0 text-lg font-medium">
+                                <tr className="bg-black text-white bg-opacity-90 backdrop-blur-xl">
+                                    <th className="px-2 py-1 rounded-tl-2xl border-black">Event</th>
+                                    <th className="px-2 py-1 border-b-black">Members</th>
+                                    <th className="px-2 py-1 border-b-black">Cost</th>
+                                    <th className="px-2 py-1 border-b-black rounded-tr-2xl">Action</th>
                                 </tr>
-                            ) : null}
-                            {selectedEvents.map((eventD, index) => {
-                                return (
-                                    <tr key={index} className="bg-white">
-                                        <td className={"border border-gray-200 px-2 py-1 max-w-8 md:max-w-full" + (index === selectedEvents.length - 1 ? "border-separate rounded-bl-2xl" : "")} >{eventD["eventName"]}</td>
-                                        <td className="border border-gray-200 px-2 py-1">{eventD["totalMembers"]}</td>
-                                        <td className={"border border-gray-200 px-2 py-1"} >{"₹ " + (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])}</td>
-                                        <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-br-2xl" : "")} >
-                                            <div onClick={() => {
-                                                removeEvent(eventD["eventId"], (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"]));
-                                            }} className="bg-red-100 text-[#3d0f0f] flex flex-row rounded-lg py-1 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit mr-2">
-                                                <span className="material-icons">remove_circle</span>
-                                            </div>
+                            </thead>
+                            <tbody>
+                                {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
+                                    <tr className="bg-white">
+                                        <td className={"border border-gray-200 px-2 py-1"} >{"Registration Fee"}</td>
+                                        <td className="border border-gray-200 px-2 py-1">{1}</td>
+                                        <td className={"border border-gray-200 px-2 py-1"} >{"₹ 60"}</td>
+                                        <td className={"border border-gray-200 px-2 py-1"} >
+                                            -
                                         </td>
                                     </tr>
-                                );
-                            })}
-                        </tbody>
-                    </table>
+                                ) : null}
+                                {selectedEvents.map((eventD, index) => {
+                                    return (
+                                        <tr key={index} className="bg-white">
+                                            <td className={"border border-gray-200 px-2 py-1 max-w-8 md:max-w-full" + (index === selectedEvents.length - 1 ? "border-separate rounded-bl-2xl" : "")} >{eventD["eventName"]}</td>
+                                            <td className="border border-gray-200 px-2 py-1">{eventD["totalMembers"]}</td>
+                                            <td className={"border border-gray-200 px-2 py-1"} >{"₹ " + (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])}</td>
+                                            <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-br-2xl" : "")} >
+                                                <div onClick={() => {
+                                                    removeEvent(eventD["eventId"], (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"]));
+                                                }} className="bg-red-100 text-[#3d0f0f] flex flex-row rounded-lg py-1 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit mr-2">
+                                                    <span className="material-icons">remove_circle</span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    );
+                                })}
+                            </tbody>
+                        </table>
 
-                    <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto">
-                        <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
-                            <p className="text-xl font-medium">{"Total Amount " + "₹ " + totalAmount}</p>
+                        <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto">
+                            <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
+                                <p className="text-xl font-medium">{"Total Amount " + "₹ " + totalAmount}</p>
+                            </div>
+                            <div className="flex flex-row justify-center items-center gap-4">
+                                <button onClick={() => {
+                                    confirm("Are you sure you want to register to these events?") ? moveToTransaction() : null;
+                                }} className="bg-green-100 text-[#0f3d0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
+                                    <span className="material-icons">check_circle</span>
+                                    <span>Confirm</span>
+                                </button>
+                                <button onClick={() => {
+                                    setSelectedEvents([]);
+                                    let temp = {};
+                                    eventsData.forEach((eventD) => {
+                                        temp[eventD["eventId"]] = false;
+                                    });
+
+                                    setIsSelected(temp);
+
+                                    if (secureLocalStorage.getItem('pragathi-ua') === '0') {
+                                        setTotalAmount(60);
+                                    } else {
+                                        setTotalAmount(0);
+                                    }
+                                }} className="bg-red-100 text-[#3d0f0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
+                                    <span className="material-icons">cancel</span>
+                                    <span>Cancel</span>
+                                </button>
+                            </div>
                         </div>
-                        <div className="flex flex-row justify-center items-center gap-4">
-                            <button onClick={() => {
-                                confirm("Are you sure you want to register to these events?") ? moveToTransaction() : null;
-                            }} className="bg-green-100 text-[#0f3d0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
-                                <span className="material-icons">check_circle</span>
-                                <span>Confirm</span>
-                            </button>
-                            <button onClick={() => {
-                                setSelectedEvents([]);
-                                let temp = {};
-                                eventsData.forEach((eventD) => {
-                                    temp[eventD["eventId"]] = false;
-                                });
+                    </>
+                ) : null}
 
-                                setIsSelected(temp);
-
-                                if (secureLocalStorage.getItem('pragathi-ua') === '0') {
-                                    setTotalAmount(60);
-                                } else {
-                                    setTotalAmount(0);
-                                }
-                            }} className="bg-red-100 text-[#3d0f0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
-                                <span className="material-icons">cancel</span>
-                                <span>Cancel</span>
-                            </button>
+                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragathi 2024 | Register to Events</h1>
+                <div className="relative mx-6 my-8 py-2 flex flex-wrap justify-center gap-4 items-center md:mx-16">
+                    {filteredEventsData.length === 0 ? (
+                        <div className='mx-auto'>
+                            <p className="p-8 text-center text-lime-100">Loading ... </p>
                         </div>
-                    </div>
-                </>
-            ) : null}
+                    ) : (
+                        filteredEventsData.map((eventD, index) => {
+                            return (
+                                <EventCard
+                                    eventId={eventD["eventId"]}
+                                    eventName={eventD["eventName"]}
+                                    presenterName={eventD["presenterName"]}
+                                    eventPrice={eventD["eventPrice"]}
+                                    eventCategory={eventD["eventCategory"]}
+                                    minSize={eventD["minSize"]}
+                                    maxSize={eventD["maxSize"]}
+                                    contactName={eventD["contactName"]}
+                                    contactNumber={eventD["contactNumber"]}
+                                    maxRegistrationCount={eventD["maxRegistrationCount"]}
+                                    noOfRegistrations={eventD["noOfRegistrations"]}
+                                    eventStatus={eventD["eventStatus"]}
+                                    priceMeasureType={eventD["priceMeasureType"]}
+                                    buildDialog={buildDialog}
+                                    openModal={openModal}
+                                    hasRegistered={eventD["isRegistered"]}
+                                    key={index}
+                                    registerToEvent={registerToEvent}
+                                />
+                            )
+                        })
+                    )}
+                </div>
 
-            <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragathi 2024 | Register to Events</h1>
-            <div className="relative mx-6 my-8 py-2 flex flex-wrap justify-center gap-4 items-center md:mx-16">
-                {filteredEventsData.length === 0 ? (
-                    <div className='mx-auto'>
-                        <p className="p-8 text-center text-lime-100">Loading ... </p>
-                    </div>
-                ) : (
-                    filteredEventsData.map((eventD, index) => {
-                        return (
-                            <EventCard
-                                eventId={eventD["eventId"]}
-                                eventName={eventD["eventName"]}
-                                presenterName={eventD["presenterName"]}
-                                eventPrice={eventD["eventPrice"]}
-                                eventCategory={eventD["eventCategory"]}
-                                minSize={eventD["minSize"]}
-                                maxSize={eventD["maxSize"]}
-                                contactName={eventD["contactName"]}
-                                contactNumber={eventD["contactNumber"]}
-                                maxRegistrationCount={eventD["maxRegistrationCount"]}
-                                noOfRegistrations={eventD["noOfRegistrations"]}
-                                eventStatus={eventD["eventStatus"]}
-                                priceMeasureType={eventD["priceMeasureType"]}
-                                buildDialog={buildDialog}
-                                openModal={openModal}
-                                hasRegistered={eventD["isRegistered"]}
-                                key={index}
-                                registerToEvent={registerToEvent}
-                            />
-                        )
-                    })
-                )}
-            </div>
-
-            <DialogModal
-                isOpen={isOpen}
-                closeModal={closeModal}
-                title={title}
-                message={message}
-                buttonLabel={buttonLabel}
-            />
-        </main>
+                <DialogModal
+                    isOpen={isOpen}
+                    closeModal={closeModal}
+                    title={title}
+                    message={message}
+                    buttonLabel={buttonLabel}
+                />
+            </main>
         </>
     )
 

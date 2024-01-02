@@ -35,7 +35,9 @@ export default function UserScreen() {
 
     const [userFullName, setUserFullName] = useState("");
     const [userEmail, setUserEmail] = useState("");
+    const [userPhone, setUserPhone] = useState("");
     const [hash, setHash] = useState("");
+    const [registrationFeeData, setRegistrationFeeData] = useState({});
     const [userAccountStatus, setUserAccountStatus] = useState("");
 
     const [eventData, setEventData] = useState([]);
@@ -54,43 +56,49 @@ export default function UserScreen() {
                     setUserEmail(data["data"][0].userEmail);
                     setHash(crypto.createHash('md5').update(data["data"][0].userEmail).digest("hex"));
                     setUserAccountStatus(data["data"][0].userAccountStatus);
-                });
-            } else if (response.status === 401) {
-                secureLocalStorage.clear();
-                buildDialog('Session Expired', 'Please login again to continue', 'Okay');
-                openModal();
+                    setUserPhone(data["data"][0].userPhone);
+                    setRegistrationFeeData(data["data"][0].registrationFee);
 
-                setTimeout(() => {
-                    router.push('/auth/login');
-                }, 2000);
-            } else {
-                buildDialog('Error', 'Something went wrong', 'Okay');
-                openModal();
+                    secureLocalStorage.setItem('pragathi-fn', data["data"][0].userFullName);
+                    secureLocalStorage.setItem('pragathi-ue', data["data"][0].userEmail);
+                    secureLocalStorage.setItem('pragathi-ph', data["data"][0].userPhone);
 
-                setTimeout(() => {
-                    router.push('/event');
-                }, 2000);
-            }
-        }).catch((err) => {
-            console.log(err);
-            buildDialog('Error', 'Something went wrong', 'Okay');
-            openModal();
+                    fetch(USER_EVENTS_URL, {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json",
+                            Authorization: `Bearer ${secureLocalStorage.getItem("pragathi-t")}`,
+                        },
+                    }).then((response) => {
+                        if (response.status === 200) {
+                            response.json().then((data) => {
+                                setEventData(data["data"]);
+                            });
+                        } else if (response.status === 401) {
+                            secureLocalStorage.clear();
+                            buildDialog('Session Expired', 'Please login again to continue', 'Okay');
+                            openModal();
 
-            setTimeout(() => {
-                router.push('/event');
-            }, 2000);
-        });
+                            setTimeout(() => {
+                                router.push('/auth/login');
+                            }, 2000);
+                        } else {
+                            buildDialog('Error', 'Something went wrong', 'Okay');
+                            openModal();
 
-        fetch(USER_EVENTS_URL, {
-            method: "GET",
-            headers: {
-                "Content-Type": "application/json",
-                Authorization: `Bearer ${secureLocalStorage.getItem("pragathi-t")}`,
-            },
-        }).then((response) => {
-            if (response.status === 200) {
-                response.json().then((data) => {
-                    setEventData(data["data"]);
+                            setTimeout(() => {
+                                router.push('/event');
+                            }, 2000);
+                        }
+                    }).catch((err) => {
+                        console.log(err);
+                        buildDialog('Error', 'Something went wrong', 'Okay');
+                        openModal();
+
+                        setTimeout(() => {
+                            router.push('/event');
+                        }, 2000);
+                    });
                 });
             } else if (response.status === 401) {
                 secureLocalStorage.clear();
@@ -128,8 +136,25 @@ export default function UserScreen() {
                     <img src={`https://www.gravatar.com/avatar/${hash}.jpg?s=200&d=robohash`} alt="Profile" width={200} className="rounded-lg"></img>
                     <div className="flex flex-col justify-between p-4 leading-normal">
                         <h5 className="mb-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{userFullName}</h5>
-                        <p className="mb-4 font-normal text-gray-700 dark:text-gray-400">{userEmail}</p>
-                        {userAccountStatus === "0" ? <p className="mb-3 font-normal text-gray-700 dark:text-gray-400"><span className="text-red-300">Registration Fee Not Paid</span></p> : <p className="mb-3 font-normal text-gray-700 dark:text-gray-400"><span className="text-green-500">Registration Fee Paid</span></p>}
+                        <p className="mb-1 font-normal text-gray-700 dark:text-gray-400">{userEmail}</p>
+                        <p className="mb-4 font-normal text-gray-700 dark:text-gray-400">{userPhone}</p>
+                        {userAccountStatus === "0" ? <p className="mb-3 font-normal text-gray-700 dark:text-gray-400"><span className="text-red-300">Registration Fee Not Paid</span></p> : (<div>
+                            <p className="font-normal text-gray-700 dark:text-gray-400">
+                                <span className="text-green-500">Registration Fee Paid</span>
+                            </p>
+                            <p className="mb-3 font-normal text-gray-700 dark:text-gray-400">
+                                <span className="text-gray-400 italic"> {new Date(registrationFeeData.createdAt).toDateString()}</span>
+                            </p>
+                        </div>)}
+                        {/* Edit profile button */}
+                        <button
+                            className="px-4 py-2 font-semibold text-black bg-lime-100 rounded-lg shadow-md hover:bg-lime-50 focus:outline-none focus:ring-2 focus:ring-lime-400 focus:ring-opacity-75"
+                            onClick={() => {
+                                router.push('/user/edit');
+                            }}
+                        >
+                            Edit Profile
+                        </button>
                     </div>
                 </div>
 
@@ -147,7 +172,9 @@ export default function UserScreen() {
                             contactNumber: eventD.contactNumber,
                             buildDialog: buildDialog,
                             openModal: openModal,
-                            transactionId: eventD.transactionId
+                            transactionId: eventD.transactionId,
+                            eventPrice: eventD.eventPrice,
+                            priceMeasureType: eventD.priceMeasureType
                         });
                     })}
                 </div>

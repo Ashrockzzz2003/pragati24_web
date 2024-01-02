@@ -1,9 +1,12 @@
 import Image from "next/image";
 import 'material-icons/iconfont/material-icons.css';
+import Link from "next/link";
 
 export default function RegisteredEventCard({
     eventId,
     totalAmount,
+    priceMeasureType,
+    eventPrice,
     eventCategory,
     totalMembers,
     contactName,
@@ -20,8 +23,7 @@ export default function RegisteredEventCard({
         </div>
         <div className="flex flex-row items-center justify-between align-middle">
             <div className="px-4 py-1 my-2 flex flex-col space-y-1 justify-center items-center">
-                <p className="font-medium text-xl text-center bg-green-100 text-[#212020] rounded-xl w-fit px-2 m-auto">{"₹ " + totalAmount + " paid"}</p>
-                <p className="font-medium text-xl text-center bg-green-100 text-[#212020] rounded-xl w-fit px-2 m-auto">TransactionID: {transactionId}</p>
+                <p className="font-medium text-xl text-center bg-green-100 text-[#212020] rounded-xl w-fit px-2 m-auto">{"₹ " + (priceMeasureType === '1' ? eventPrice : eventPrice * totalMembers)}</p>
                 <div className="flex flex-row h-fit">
                     {eventCategory === '0' ? (
                         <div className="bg-yellow-100 rounded-xl pt-1 pb-1 px-2 w-fit text-[#544a15] align-middle">{"Management"}</div>
@@ -49,5 +51,7 @@ export default function RegisteredEventCard({
 
             <p className="text-sm">{totalMembers + (totalMembers === 1 ? " member" : " members")}</p>
         </div>
+        <hr className="border-gray-300 w-full" />
+        <button className="font-sm text-gray-700 underline">View Receipt</button>
     </div>;
 }

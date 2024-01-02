@@ -34,8 +34,11 @@ export default function EventCard({
             <Image src={`/event/${eventId}.png`} width={300} height={300} className="rounded-t-xl max-h-100" alt={eventId + "_im"} />
         </div>
         <div className="flex flex-row items-center justify-between align-middle">
-            <div className="px-4 py-1 my-2 flex flex-col space-y-1 justify-center items-center">
-                <p className="font-medium text-xl text-center bg-green-100 text-[#212020] rounded-xl w-fit px-2 m-auto">{"₹ " + eventPrice + " / " + (priceMeasureType === "0" ? "head" : "team")}</p>
+            <div className="px-3 py-1 my-2 flex flex-col space-y-1 justify-start items-start">
+                <div className="font-medium text-xl text-center bg-green-100 text-[#212020] rounded-xl w-fit px-2">
+                    <p>{"₹ " + eventPrice + " / " + (priceMeasureType === "0" ? "head" : "team")}</p>
+                    <p className="text-xs text-gray-500">Inclusive of GST</p>
+                </div>
                 <div className="flex flex-row h-fit">
                     {eventCategory === '0' ? (
                         <div className="bg-yellow-100 rounded-xl pt-1 pb-1 px-2 w-fit text-[#544a15] align-middle">{"Management"}</div>
