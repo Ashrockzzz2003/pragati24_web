@@ -26,6 +26,10 @@ export default function EventCard({
     // For The AlertDialogModal
 
     return <div className={"border flex flex-col rounded-xl backdrop-blur-xl bg-gray-50 w-72"} >
+        {/* <div className="bg-gray-100 rounded-lg flex flex-row py-2 px-1 justify-between items-center hover:bg-opacity-80 cursor-pointer">
+            <span className="material-icons">call</span>
+            <p className="text-sm text-gray-500 py-1 px-1 text-center">{contactName} | {contactNumber}</p>
+        </div> */}
         <div>
             <Image src={`/event/${eventId}.png`} width={300} height={300} className="rounded-t-xl max-h-100" alt={eventId + "_im"} />
         </div>
@@ -41,7 +45,7 @@ export default function EventCard({
                     <div onClick={
                         () => {
                             if (minSize !== maxSize) {
-                                buildDialog("Details", `The team leader alone should register for the event and pay the amount. The team size should be between ${minSize} and ${maxSize}.Any doubts contact, ${contactName} | ${contactNumber}`, 'Okay')
+                                buildDialog("Details", `The team leader alone should register for the event and pay the amount. The team size should be between ${minSize} and ${maxSize}. Any doubts contact, ${contactName} | ${contactNumber}`, 'Okay')
                             } else {
                                 buildDialog("Contact Detials", `${contactName} | ${contactNumber}`, 'Okay')
                             }
