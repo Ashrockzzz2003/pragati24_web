@@ -40,7 +40,11 @@ export default function EventCard({
                     )}
                     <div onClick={
                         () => {
-                            buildDialog("Contact Detials", `${contactName} | ${contactNumber}`, 'Okay')
+                            if (minSize !== maxSize) {
+                                buildDialog("Details", `The team leader alone should register for the event and pay the amount. The team size should be between ${minSize} and ${maxSize}.Any doubts contact, ${contactName} | ${contactNumber}`, 'Okay')
+                            } else {
+                                buildDialog("Contact Detials", `${contactName} | ${contactNumber}`, 'Okay')
+                            }
                             openModal()
                         }
                     } className="bg-red-100 text-[#430e0e] flex flex-row rounded-xl pt-0 pb-0 px-1 items-center hover:bg-opacity-80 cursor-pointer ml-1">

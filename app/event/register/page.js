@@ -121,7 +121,7 @@ export default function RegisterEventScreen() {
 
         } else {
             // prompt for team size
-            let teamSize = prompt("Enter Number of members in your team", minSize);
+            let teamSize = prompt(`The team leader alone should register for the event and pay the amount. The team size should be between ${minSize} and ${maxSize}. Enter Number of members in your team`, minSize);
             teamSize = parseInt(teamSize);
 
             if (teamSize >= minSize && teamSize <= maxSize) {
@@ -250,6 +250,18 @@ export default function RegisterEventScreen() {
                     }}
                 />
             </div>
+
+            {/* Info Box regarding mandatory registration fee of 60 rs */}
+            {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
+                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
+                    <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
+                        <p className="text-xl font-medium">{"Registration Fee"}</p>
+                        <p className="text-xl font-medium">{"₹ 60"}</p>
+                    </div>
+                    <p className="text-sm font-medium text-gray-700 max-w-[256px]">{"Note: You have to pay a mandatory registration fee of ₹ 60 to register to events."}</p>
+                </div>
+            ) : null}
+
 
             {selectedEvents.length > 0 ? (
                 <>
