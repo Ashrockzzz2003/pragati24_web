@@ -4,6 +4,7 @@ import DialogModal from "@/components/DialogModal";
 import EventCard from "@/components/EventCard";
 import NavBar from "@/components/NavBar";
 import { GET_EVENTS_URL, REGISTER_EVENT_URL } from "@/components/constants";
+import { payUKey } from "@/components/payU";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import secureLocalStorage from "react-secure-storage";
@@ -185,7 +186,50 @@ export default function RegisterEventScreen() {
 
         if (response.status === 200) {
             const data = await response.json();
-            console.log(data);
+            /*
+            amount: 1109
+            email: "shettyajoy@gmail.com"
+            firstname: "Ajoy Shetty"
+            furl: "http://localhost:3000/event/register/success"
+            hash: "5665664057950c6a9208a4829f4ac3822fe42145f4552f32951831731e664ddb9afe6dd1a226239f26cb33a4b52f084b6427cdb29b720f531b5d262299743335"
+            phone: "8870014773"
+            productinfo: "(1,1,299)-(2,3,750)-(0,1,60)"
+            surl: "http://localhost:3000/event/register/failure"
+            txnid: "TXN-2-1704185233379"
+            */
+
+            // Send to payU
+            const payUData = {
+                key: payUKey,
+                txnid: data["txnid"],
+                amount: data["amount"],
+                productinfo: data["productinfo"],
+                firstname: data["firstname"],
+                email: data["email"],
+                phone: data["phone"],
+                surl: data["surl"],
+                furl: data["furl"],
+                hash: data["hash"]
+            }
+
+            const payUForm = document.createElement('form');
+            payUForm.method = 'post';
+            payUForm.action = 'https://test.payu.in/_payment';
+
+            for (const key in payUData) {
+                if (payUData.hasOwnProperty(key)) {
+                    const hiddenField = document.createElement('input');
+                    hiddenField.type = 'hidden';
+                    hiddenField.name = key;
+                    hiddenField.value = payUData[key];
+
+                    payUForm.appendChild(hiddenField);
+                }
+            }
+
+            document.body.appendChild(payUForm);
+
+            payUForm.submit();
         }
     }
 
