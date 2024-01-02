@@ -13,6 +13,7 @@ const GET_EVENTS_URL = `${USER_URL}/event/all`;
 const REGISTER_EVENT_URL = `${USER_URL}/event/register`;
 
 const USER_PROFILE_URL = `${USER_URL}/profile`;
+const USER_EVENTS_URL = `${USER_URL}/profile/event`;
 
 export {
     LOGIN_URL,
@@ -23,4 +24,5 @@ export {
     GET_EVENTS_URL,
     REGISTER_EVENT_URL,
     USER_PROFILE_URL,
+    USER_EVENTS_URL
 };
