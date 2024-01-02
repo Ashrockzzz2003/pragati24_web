@@ -9,6 +9,7 @@ import { REGISTER_URL } from "@/components/constants";
 import secureLocalStorage from "react-secure-storage";
 import { hashPassword } from "@/components/hashData";
 import { useRouter } from "next/navigation";
+import NavBar from "@/components/NavBar";
 
 export default function RegisterScreen() {
     // For The AlertDialogModal
@@ -115,7 +116,9 @@ export default function RegisterScreen() {
     }, []);
 
     return (
-        <main className="flex h-screen flex-1 flex-col justify-center">
+        <>
+        <NavBar />
+        <main className="flex h-[90vh] flex-1 flex-col justify-center">
             <div className="border border-gray-300 rounded-2xl mx-auto w-11/12 sm:max-w-11/12 md:max-w-md lg:max-w-md backdrop-blur-xl bg-gray-50">
                 <div
                     className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
@@ -250,5 +253,6 @@ export default function RegisterScreen() {
                 buttonLabel={buttonLabel}
             />
         </main>
+        </>
     );
 }

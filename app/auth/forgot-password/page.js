@@ -1,13 +1,13 @@
 "use client";
 
 import DialogModal from "@/components/DialogModal";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import validator from 'validator';
 import 'material-icons/iconfont/material-icons.css';
 import { FORGOT_PASSWORD_URL } from "@/components/constants";
 import secureLocalStorage from "react-secure-storage";
 import { useRouter } from "next/navigation";
+import NavBar from "@/components/NavBar";
 
 export default function FPScreen() {
     // For The AlertDialogModal
@@ -38,7 +38,7 @@ export default function FPScreen() {
         setButtonLabel(buttonLabel);
     }
 
-    const handleLogin = async (e) => {
+    const handleForgotPassword = async (e) => {
         e.preventDefault();
 
         if (!isValidEmail) {
@@ -97,7 +97,9 @@ export default function FPScreen() {
     }, []);
 
     return (
-        <main className="flex h-screen flex-1 flex-col justify-center">
+        <>
+        <NavBar />
+        <main className="flex h-[90vh] flex-1 flex-col justify-center">
             <div className="border border-gray-300 rounded-2xl mx-auto w-11/12 sm:max-w-11/12 md:max-w-md lg:max-w-md backdrop-blur-xl bg-gray-50">
                 <div
                     className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
@@ -120,7 +122,7 @@ export default function FPScreen() {
                 </div>
 
                 <div className="mt-10 mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md px-6 pb-8 lg:px-8 ">
-                    <form className="space-y-6" onSubmit={handleLogin}>
+                    <form className="space-y-6" onSubmit={handleForgotPassword}>
                         <div>
                             <label className="block text-md font-medium leading-6 text-black">
                                 Email ID
@@ -157,5 +159,6 @@ export default function FPScreen() {
                 buttonLabel={buttonLabel}
             />
         </main>
+        </>
     );
 }

@@ -2,6 +2,7 @@
 
 import DialogModal from "@/components/DialogModal";
 import EventCard from "@/components/EventCard";
+import NavBar from "@/components/NavBar";
 import { GET_EVENTS_URL, REGISTER_EVENT_URL } from "@/components/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -85,7 +86,7 @@ export default function RegisterEventScreen() {
             })
             .catch(err => {
                 console.log(err);
-                buildDialog('Error', 'Something went wrong!', 'OK');
+                buildDialog('Alert', 'You must login to register to events!', 'OK');
                 openModal();
             })
     }, [router]);
@@ -190,7 +191,9 @@ export default function RegisterEventScreen() {
 
 
     return (
-        <main className="h-screen">
+        <>
+        <NavBar />
+        <main className="h-full">
             <div
                 className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
                 aria-hidden="true"
@@ -206,8 +209,8 @@ export default function RegisterEventScreen() {
 
             {selectedEvents.length > 0 ? (
                 <>
-                    <h1 className="mb-8 pt-8 text-4xl text-lime-50 text-center">Selected Events to Register</h1>
-                    <table className="max-w-11/12 ml-auto mr-auto my-4 rounded-2xl backdrop-blur-2xl bg-opacity-30 text-center text-md border-black border-separate border-spacing-0 border-solid">
+                    <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Selected Events to Register</h1>
+                    <table className="max-w-9/12 ml-auto mr-auto my-4 rounded-2xl backdrop-blur-2xl bg-opacity-30 text-center text-md border-black border-separate border-spacing-0 border-solid">
                         <thead className="border-0 text-lg font-medium">
                             <tr className="bg-black text-white bg-opacity-90 backdrop-blur-xl">
                                 <th className="px-2 py-1 rounded-tl-2xl border-black">Event</th>
@@ -230,7 +233,7 @@ export default function RegisterEventScreen() {
                             {selectedEvents.map((eventD, index) => {
                                 return (
                                     <tr key={index} className="bg-white">
-                                        <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-bl-2xl" : "")} >{eventD["eventName"]}</td>
+                                        <td className={"border border-gray-200 px-2 py-1 max-w-8 md:max-w-full" + (index === selectedEvents.length - 1 ? "border-separate rounded-bl-2xl" : "")} >{eventD["eventName"]}</td>
                                         <td className="border border-gray-200 px-2 py-1">{eventD["totalMembers"]}</td>
                                         <td className={"border border-gray-200 px-2 py-1"} >{"₹ " + (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])}</td>
                                         <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-br-2xl" : "")} >
@@ -280,7 +283,7 @@ export default function RegisterEventScreen() {
                 </>
             ) : null}
 
-            <h1 className="mb-8 pt-8 text-4xl text-lime-50 text-center">Pragathi 2024 | Register to Events</h1>
+            <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragathi 2024 | Register to Events</h1>
             <div className="relative mx-6 my-8 py-2 flex flex-wrap justify-center gap-4 items-center md:mx-16">
                 {filteredEventsData.length === 0 ? (
                     <div className='mx-auto'>
@@ -322,6 +325,7 @@ export default function RegisterEventScreen() {
                 buttonLabel={buttonLabel}
             />
         </main>
+        </>
     )
 
 }

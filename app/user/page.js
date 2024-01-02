@@ -1,7 +1,12 @@
+import NavBar from "@/components/NavBar";
+
 export default function UserScreen() { 
     return (
-        <main>
-            <h1>User Page</h1>
-        </main>
+        <>
+            <NavBar />
+            <main>
+
+            </main>
+        </>
     )
 }
