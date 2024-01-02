@@ -3,8 +3,8 @@ const nextConfig = {
     experimental: {
         serverActions: {
             allowedOrigins: [
-                'http://localhost:3000',
-                'https://test.payu.in'
+                'localhost:3000',
+                'test.payu.in'
             ]
         }
     }
