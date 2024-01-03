@@ -30,12 +30,15 @@ export default function RegisterScreen() {
 
     const [userEmail, setUserEmail] = useState('');
     const [userFullName, setUserFullName] = useState('');
+    const [userRollNumber, setUserRollNumber] = useState('');
     const [userPassword, setUserPassword] = useState('');
     const [userConfirmPassword, setUserConfirmPassword] = useState('');
     const [userPhone, setUserPhone] = useState('');
 
 
     const isValidPassword = (userPassword.length >= 8 && userConfirmPassword.length >= 8 && userPassword === userConfirmPassword);
+    const rollNumberRegex = /^[a-zA-Z0-9.]+$/;
+    const isValidRollNumber = rollNumberRegex.test(userRollNumber) && userRollNumber.length === 16;
     const isValidName = validator.isAlpha(userFullName.replace(/\s/g, ''));
     const isValidEmail = validator.isEmail(userEmail);
     const isValidPhone = validator.isMobilePhone(userPhone, 'en-IN');
@@ -51,7 +54,7 @@ export default function RegisterScreen() {
     const handleRegister = async (e) => {
         e.preventDefault();
 
-        if (!isValidEmail || !isValidPassword || !isValidName || !isValidPhone) {
+        if (!isValidEmail || !isValidPassword || !isValidName || !isValidPhone || !isValidRollNumber) {
             buildDialog('Invalid Email or Password or Name or Mobile Number', 'Please enter a valid EmailID/Password/Name/MobileNumber to continue', 'Okay');
             openModal();
             return;
@@ -70,7 +73,8 @@ export default function RegisterScreen() {
                     userEmail: userEmail,
                     userFullName: userFullName,
                     userPassword: hashPassword(userPassword),
-                    userPhone: userPhone
+                    userPhone: userPhone,
+                    userRollNumber: userRollNumber
                 })
             });
 
@@ -112,6 +116,7 @@ export default function RegisterScreen() {
         setUserPassword('');
         setUserFullName('');
         setUserPhone('');
+        setUserRollNumber('');
         setUserConfirmPassword('');
     }, []);
 
@@ -154,6 +159,22 @@ export default function RegisterScreen() {
                                     onChange={(e) => setUserEmail(e.target.value.toLowerCase())}
                                     className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
                                         (!isValidEmail && userEmail ? ' ring-red-500' : isValidEmail && userEmail ? ' ring-green-500' : ' ring-bGray')}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-md font-medium leading-6 text-black">
+                                Roll Number
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    autoComplete="rollno"
+                                    onChange={(e) => setUserRollNumber(e.target.value.toString().toUpperCase())}
+                                    className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none uppercase" +
+                                        (!isValidRollNumber && userRollNumber ? ' ring-red-500' : isValidRollNumber && userRollNumber ? ' ring-green-500' : ' ring-bGray')}
                                     required
                                 />
                             </div>
@@ -238,7 +259,7 @@ export default function RegisterScreen() {
                             <input
                                 value="Register"
                                 type="submit"
-                                disabled={(!isValidEmail || !isValidPassword || !isValidName || !isValidPhone) && buttonState}
+                                disabled={(!isValidEmail || !isValidPassword || !isValidName || !isValidPhone || !isValidRollNumber) && buttonState}
                                 className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
                         </div>
                     </form>

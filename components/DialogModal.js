@@ -2,7 +2,7 @@ import { Dialog, Transition } from '@headlessui/react'
 import { Fragment } from 'react'
 
 export default function DialogModal({
-    closeModal, title, message, buttonLabel, isOpen
+    closeModal, title, message, buttonLabel, isOpen, isReceipt = false
 }) {
     return (
         <>
@@ -39,9 +39,15 @@ export default function DialogModal({
                                         {title}
                                     </Dialog.Title>
                                     <div className="mt-2">
+                                        {isReceipt ? (
+                                        <div className="flex flex-col" dangerouslySetInnerHTML={{__html: message}}>
+                                        </div>
+                                        ) : (
+
                                         <p className="text-sm text-gray-500">
                                             {message}
                                         </p>
+                                        )}
                                     </div>
 
                                     <div className="mt-4">

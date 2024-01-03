@@ -162,75 +162,101 @@ export default function RegisterEventScreen() {
 
 
     const moveToTransaction = async () => {
-        // main multi dimensional array
-        let finalToTransactionArray = [];
 
-        // make array. (eventId, totalMembers, totalPrice)
-        selectedEvents.forEach((eventD) => {
-            finalToTransactionArray.push([eventD["eventId"], eventD["totalMembers"], (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])]);
-        });
+        try {
+            // main multi dimensional array
+            let finalToTransactionArray = [];
 
-        // console.log(finalToTransactionArray);
+            // make array. (eventId, totalMembers, totalPrice)
+            selectedEvents.forEach((eventD) => {
+                finalToTransactionArray.push([eventD["eventId"], eventD["totalMembers"], (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])]);
+            });
 
-        // make api call to our server to get hash
-        const response = await fetch(REGISTER_EVENT_URL, {
-            method: 'POST',
-            headers: {
-                "Content-Type": "application/json",
-                "Authorization": `Bearer ${secureLocalStorage.getItem('pragathi-t')}`
-            },
-            body: JSON.stringify({
-                "eventList": finalToTransactionArray
-            })
-        });
+            // console.log(finalToTransactionArray);
 
-        if (response.status === 200) {
-            const data = await response.json();
-            /*
-            amount: 1109
-            email: "shettyajoy@gmail.com"
-            firstname: "Ajoy Shetty"
-            furl: "http://localhost:3000/event/register/success"
-            hash: "5665664057950c6a9208a4829f4ac3822fe42145f4552f32951831731e664ddb9afe6dd1a226239f26cb33a4b52f084b6427cdb29b720f531b5d262299743335"
-            phone: "8870014773"
-            productinfo: "(1,1,299)-(2,3,750)-(0,1,60)"
-            surl: "http://localhost:3000/event/register/failure"
-            txnid: "TXN-2-1704185233379"
-            */
+            // make api call to our server to get hash
+            const response = await fetch(REGISTER_EVENT_URL, {
+                method: 'POST',
+                headers: {
+                    "Content-Type": "application/json",
+                    "Authorization": `Bearer ${secureLocalStorage.getItem('pragathi-t')}`
+                },
+                body: JSON.stringify({
+                    "eventList": finalToTransactionArray
+                })
+            });
 
-            // Send to payU
-            const payUData = {
-                key: payUKey,
-                txnid: data["txnid"],
-                amount: data["amount"],
-                productinfo: data["productinfo"],
-                firstname: data["firstname"],
-                email: data["email"],
-                phone: data["phone"],
-                surl: data["surl"],
-                furl: data["furl"],
-                hash: data["hash"]
-            }
+            if (response.status === 200) {
+                const data = await response.json();
+                /*
+                amount: 1109
+                email: "shettyajoy@gmail.com"
+                firstname: "Ajoy Shetty"
+                furl: "http://localhost:3000/event/register/success"
+                hash: "5665664057950c6a9208a4829f4ac3822fe42145f4552f32951831731e664ddb9afe6dd1a226239f26cb33a4b52f084b6427cdb29b720f531b5d262299743335"
+                phone: "8870014773"
+                productinfo: "(1,1,299)-(2,3,750)-(0,1,60)"
+                surl: "http://localhost:3000/event/register/failure"
+                txnid: "TXN-2-1704185233379"
+                */
 
-            const payUForm = document.createElement('form');
-            payUForm.method = 'post';
-            payUForm.action = 'https://test.payu.in/_payment';
-
-            for (const key in payUData) {
-                if (payUData.hasOwnProperty(key)) {
-                    const hiddenField = document.createElement('input');
-                    hiddenField.type = 'hidden';
-                    hiddenField.name = key;
-                    hiddenField.value = payUData[key];
-
-                    payUForm.appendChild(hiddenField);
+                // Send to payU
+                const payUData = {
+                    key: payUKey,
+                    txnid: data["txnid"],
+                    amount: data["amount"],
+                    productinfo: data["productinfo"],
+                    firstname: data["firstname"],
+                    email: data["email"],
+                    phone: data["phone"],
+                    surl: data["surl"],
+                    furl: data["furl"],
+                    hash: data["hash"]
                 }
+
+                const payUForm = document.createElement('form');
+                payUForm.method = 'post';
+                payUForm.action = 'https://test.payu.in/_payment';
+
+                for (const key in payUData) {
+                    if (payUData.hasOwnProperty(key)) {
+                        const hiddenField = document.createElement('input');
+                        hiddenField.type = 'hidden';
+                        hiddenField.name = key;
+                        hiddenField.value = payUData[key];
+
+                        payUForm.appendChild(hiddenField);
+                    }
+                }
+
+                document.body.appendChild(payUForm);
+
+                secureLocalStorage.clear(); // logout before going to payU. This is to prevent user from going back to the registration page after paying.
+                payUForm.submit();
+            } else if (response.status === 401) {
+                buildDialog('Session Expired', 'Please Login to continue.', 'Okay');
+                openModal();
+                setTimeout(() => {
+                    router.push('/auth/login');
+                }, 3000);
+            } else if (response.status === 400) {
+                const data = await response.json();
+
+                if (data["ERROR"]) {
+                    buildDialog('Error', data["ERROR"], 'Okay');
+                    openModal();
+                } else {
+                    buildDialog('Error', 'Something went wrong!', 'Okay');
+                    openModal();
+                }
+            } else {
+                buildDialog('Error', 'Something went wrong!', 'Okay');
+                openModal();
             }
-
-            document.body.appendChild(payUForm);
-
-            secureLocalStorage.clear(); // logout before going to payU. This is to prevent user from going back to the registration page after paying.
-            payUForm.submit();
+        } catch (error) {
+            console.log(error);
+            buildDialog('Error', 'Something went wrong!', 'Okay');
+            openModal();
         }
     }
 

@@ -1,0 +1,226 @@
+"use client";
+
+import AdminNavBar from "@/components/AdminNavbar";
+import { ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL, ADMIN_EVENTS_URL } from "@/components/constants";
+import { useRouter } from "next/navigation";
+import { useState, useEffect } from "react";
+import secureLocalStorage from "react-secure-storage";
+
+
+export default function EventsScreen() {
+    // For The AlertDialogModal
+    const [isOpen, setIsOpen] = useState(false);
+    const [title, setTitle] = useState('');
+    const [message, setMessage] = useState('');
+    const [buttonLabel, setButtonLabel] = useState('');
+
+    const openModal = () => {
+        setIsOpen(true);
+    }
+
+    const closeModal = () => {
+        setIsOpen(false);
+    }
+
+    const router = useRouter();
+
+
+    const buildDialog = (title, message, buttonLabel) => {
+        setTitle(title);
+        setMessage(message);
+        setButtonLabel(buttonLabel);
+    }
+
+    const [eventsData, setEventsData] = useState([]);
+
+    useEffect(() => {
+        fetch(ADMIN_EVENTS_URL, {
+            method: "GET",
+            headers: {
+                "Content-Type": "application/json",
+                Authorization: `Bearer ${secureLocalStorage.getItem("pragathi-t")}`,
+            },
+        }).then((response) => {
+            if (response.status === 200) {
+                response.json().then((data) => {
+                    setEventsData(data["data"]);
+                });
+            } else if (response.status === 401) {
+                secureLocalStorage.clear();
+                buildDialog('Session Expired', 'Please login again to continue', 'Okay');
+                openModal();
+
+                setTimeout(() => {
+                    router.push("/login");
+                }, 3000);
+            } else {
+                buildDialog('Error', 'Something went wrong', 'Okay');
+                openModal();
+            }
+        });
+    }, [router]);
+
+
+    const downloadParitcipantsList = async (eventId, eventPrice, priceMeasureType) => {
+        try {
+            const response = await fetch(ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${secureLocalStorage.getItem("pragathi-t")}`,
+                },
+                body: JSON.stringify({ eventId: eventId }),
+            });
+    
+            if (response.status === 200) {
+                const data = await response.json();
+
+                /*
+                createdAt: "2024-01-03T13:27:03.000Z"
+                totalMembers: 1
+                transactionId: "TXN-1-1704214843907"
+                userEmail: "shettyajoy@gmail.com"
+                userFullName: "Ajoy Shetty"
+                userId: 2
+                userPhone: "8870014773"
+                */
+
+                const csvData = data["data"].map((participant) => {
+                    return {
+                        "Transaction ID": participant.transactionId,
+                        "Full Name": participant.userFullName,
+                        "Email": participant.userEmail,
+                        "Phone": participant.userPhone,
+                        "No Of Members": participant.totalMembers,
+                        "Registered At": new Date(participant.createdAt).toDateString(),
+                        "Amount Paid": (priceMeasureType === '1' ? eventPrice : eventPrice * participant.totalMembers),
+                    }
+                });
+
+                const csvFields = [
+                    "Transaction ID",
+                    "Full Name",
+                    "Email",
+                    "Phone",
+                    "No Of Members",
+                    "Registered At",
+                    "Amount Paid",
+                ];
+
+                const csv = csvData.map(row => csvFields.map(fieldName => JSON.stringify(row[fieldName], null, 2)).join(','));
+                csv.unshift(csvFields.join(','));
+                const csvArray = csv.join('\r\n');
+                
+                const a = document.createElement('a');
+                const file = new Blob([csvArray], {type: 'text/csv'});
+                a.href= URL.createObjectURL(file);
+                a.download = `event-${eventId}-participants-list-${new Date().getTime()}.csv`
+                a.click();
+
+                buildDialog('Success', 'Participants List Downloaded', 'Okay');
+                openModal();
+
+                return;
+
+
+            } else if (response.status === 401) {
+                secureLocalStorage.clear();
+                buildDialog('Session Expired', 'Please login again to continue', 'Okay');
+                openModal();
+    
+                setTimeout(() => {
+                    router.push("/login");
+                }, 3000);
+            } else if (response.status === 400) {
+                const data = await response.json();
+                if (data["ERROR"]) {
+                    buildDialog('Error', data["ERROR"], 'Okay');
+                    openModal();
+                } else {
+                    buildDialog('Error', 'Something went wrong', 'Okay');
+                    openModal();
+                }
+            } else {
+                buildDialog('Error', 'Something went wrong', 'Okay');
+                openModal();
+            }
+
+            return;
+        } catch (error) {
+            console.log(error);
+            buildDialog('Error', 'Something went wrong', 'Okay');
+            openModal();
+        }
+    }
+
+    return (
+        <>
+            <AdminNavBar />
+            <main className="h-full">
+                <div
+                    className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
+                    aria-hidden="true"
+                >
+                    <div
+                        className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[64%] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#a8abce] to-[#a9afde] opacity-10"
+                        style={{
+                            clipPath:
+                                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%, 45.2% 34.5%)',
+                        }}
+                    />
+                </div>
+
+                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragathi 2024 | Events Data</h1>
+                {eventsData.length === 0 ? (
+                    <div className='mx-auto'>
+                        <p className="p-8 text-center text-lime-100">Loading ... </p>
+                    </div>
+                ) : (
+                    <table className="mx-auto max-w-11/12 border-collapse">
+                        <thead className="bg-black text-white">
+                            <tr>
+                                <th className="p-2 text-center">Event ID</th>
+                                <th className="p-2 text-center">Event Name</th>
+                                <th className="p-2 text-center">Event Price</th>
+                                <th className="p-2 text-center">Event Category</th>
+                                <th className="p-2 text-center">Size</th>
+                                <th className="p-2 text-center">No Of Registrations</th>
+                                <th className="p-2 text-center">Max Registrations</th>
+                                <th className="p-2 text-center">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody className="bg-white">
+                            {eventsData.map((eventD, index) => (
+                                <tr key={index}>
+                                    <td className="p-2 text-center border">{eventD.eventId}</td>
+                                    <td className="p-2 text-center border">{eventD.eventName}</td>
+                                    <td className="p-2 text-end border">{"₹ " + eventD.eventPrice + " / " + (eventD.priceMeasureType === "0" ? "head" : "team")}</td>
+                                    <td className="p-2 text-center border">{eventD.eventCategory === '0' ? (
+                                        <div className="bg-yellow-100 rounded-xl pt-1 pb-1 px-2 w-fit text-[#544a15] align-middle">{"Management"}</div>
+                                    ) : (
+                                        <div className="bg-pink-100 rounded-xl pt-1 pb-1 px-2 w-fit text-[#461348] align-middle">{"Non-Management"}</div>
+                                    )}</td>
+                                    <td className="p-2 text-center border">
+                                        {eventD.minSize === eventD.maxSize ? (
+                                            <p className="text-sm">{eventD.minSize + (eventD.minSize === 1 ? " member" : " members")}</p>
+                                        ) : (
+                                            <p className="text-sm">{eventD.minSize + " to " + eventD.maxSize + " members"}</p>
+                                        )}
+                                    </td>
+                                    <td className="p-2 text-center border">{eventD.noOfRegistrations}</td>
+                                    <td className="p-2 text-center border">{eventD.maxRegistrationCount}</td>
+                                    <td className="p-2 text-center border">
+                                        <button onClick={() => {downloadParitcipantsList(eventD.eventId, eventD.eventPrice, eventD.priceMeasureType)}} className="bg-blue-100 text-[#0f113d] flex flex-row rounded-lg py-2 px-2 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit mr-2">
+                                            <span className="material-icons mr-2">download</span>
+                                            <p className="text-sm">Download Participants</p>
+                                        </button>
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                )}
+            </main>
+        </>
+    )
+}

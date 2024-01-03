@@ -30,6 +30,7 @@ export default function EditProfileScreen() {
     const [userEmail, setUserEmail] = useState('');
     const [userFullName, setUserFullName] = useState('');
     const [userPhone, setUserPhone] = useState('');
+    const [userRollNumber, setUserRollNumber] = useState('');
 
     const isValidName = validator.isAlpha(userFullName.replace(/\s/g, ''));
     const isValidPhone = validator.isMobilePhone(userPhone, 'en-IN');
@@ -53,12 +54,13 @@ export default function EditProfileScreen() {
         setUserEmail(secureLocalStorage.getItem('pragathi-ue'));
         setUserFullName(secureLocalStorage.getItem('pragathi-fn'));
         setUserPhone(secureLocalStorage.getItem('pragathi-ph'));
+        setUserRollNumber(secureLocalStorage.getItem('pragathi-urn'));
     }, [router]);
 
     const handleEditProfile = async (e) => {
         e.preventDefault();
 
-        if (!isValidName || !isValidPhone) {
+        if (!isValidName || !isValidPhone || !isValidRollNumber) {
             buildDialog('Invalid Name or Mobile Number', 'Please enter a valid Name/MobileNumber to continue', 'Okay');
             openModal();
             return;
@@ -76,7 +78,8 @@ export default function EditProfileScreen() {
                 },
                 body: JSON.stringify({
                     userFullName: userFullName,
-                    userPhone: userPhone
+                    userPhone: userPhone,
+                    userRollNumber: userRollNumber
                 })
             });
 
@@ -150,6 +153,22 @@ export default function EditProfileScreen() {
                                     placeholder='Enter your Email ID'
                                     onChange={(e) => setUserEmail(e.target.value.toLowerCase())}
                                     className={"block text-lg w-full rounded-md py-2 px-2 shadow-sm ring-1 ring-inset ring-bGray text-gray-400 italic sm:text-md sm:leading-6 !outline-none"}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-md font-medium leading-6 text-black">
+                                Roll Number
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    autoComplete="rollno"
+                                    defaultValue={userRollNumber}
+                                    disabled
+                                    className={"block text-lg w-full rounded-md py-2 px-2 shadow-sm ring-1 ring-inset ring-bGray text-gray-400 italic sm:text-md sm:leading-6 !outline-none"}                                    
                                     required
                                 />
                             </div>

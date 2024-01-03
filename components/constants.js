@@ -10,10 +10,14 @@ const FORGOT_PASSWORD_VERIFY_URL = `${AUTH_URL}/forgot-password/verify`;
 
 const GET_EVENTS_URL = `${USER_URL}/event/all`;
 const REGISTER_EVENT_URL = `${USER_URL}/event/register`;
+const EVENT_RECEIPT_URL = `${USER_URL}/event/receipt`;
 
 const USER_PROFILE_URL = `${USER_URL}/profile`;
 const USER_EVENTS_URL = `${USER_URL}/profile/event`;
 const EDIT_PROFILE_URL = `${USER_URL}/profile/edit`;
+
+const ADMIN_EVENTS_URL = `${BASE_URL}/admin/event/all`;
+const ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL = `${BASE_URL}/admin/event/participants`;
 
 export {
     LOGIN_URL,
@@ -26,4 +30,7 @@ export {
     USER_PROFILE_URL,
     USER_EVENTS_URL,
     EDIT_PROFILE_URL,
+    EVENT_RECEIPT_URL,
+    ADMIN_EVENTS_URL,
+    ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL
 };

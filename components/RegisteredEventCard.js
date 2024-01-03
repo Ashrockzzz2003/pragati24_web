@@ -1,6 +1,8 @@
 import Image from "next/image";
 import 'material-icons/iconfont/material-icons.css';
-import Link from "next/link";
+import { EVENT_RECEIPT_URL } from "./constants";
+import secureLocalStorage from "react-secure-storage";
+import { useRouter } from "next/navigation";
 
 export default function RegisteredEventCard({
     eventId,
@@ -13,11 +15,132 @@ export default function RegisteredEventCard({
     contactNumber,
     buildDialog,
     openModal,
-    transactionId
+    transactionId,
+    key
 }) {
-    // For The AlertDialogModal
+    const router = useRouter();
 
-    return <div className={"border flex flex-col rounded-xl backdrop-blur-xl bg-gray-50 w-72"} >
+    const getEventRegistrationReceipt = async () => {
+        try {
+            const response = await fetch(EVENT_RECEIPT_URL, {
+                method: "POST",
+                headers: {
+                    "Content-Type": "application/json",
+                    Authorization: `Bearer ${secureLocalStorage.getItem("pragathi-t")}`,
+                },
+                body: JSON.stringify({
+                    eventId: eventId
+                })
+            });
+
+            if (response.status === 200) {
+                const data = await response.json();
+
+                /*
+                "data": {
+                    "transactionId": "TXN-1-1704214843907",
+                    "transactionCreatedAt": "2024-01-03T11:48:30.000Z",
+                    "transactionAmount": 359,
+                    "splitUp": [
+                        {
+                            "eventName": "Registration Fee",
+                            "totalMembers": "1",
+                            "amount": "60"
+                        },
+                        {
+                            "eventName": "Galactic Managers (Best Marketing manager)",
+                            "totalMembers": "1",
+                            "amount": "299"
+                        }
+                    ]
+                }
+                */
+
+                const transactionId = data["data"].transactionId;
+                const transactionCreatedAt = new Date(data["data"].transactionCreatedAt).toDateString();
+                const transactionAmount = data["data"].transactionAmount;
+                const splitUp = data["data"].splitUp;
+
+                // recipt table
+                const receipt = `
+                <div class="flex flex-col">
+                    <div class="flex flex-row justify-between">
+                        <p class="text-sm">Transaction ID</p>
+                        <p class="text-sm">${transactionId}</p>
+                    </div>
+                    <div class="flex flex-row justify-between">
+                        <p class="text-sm">Transaction Date</p>
+                        <p class="text-sm">${transactionCreatedAt}</p>
+                    </div>
+                    <div class="flex flex-row justify-between">
+                        <p class="text-sm">Transaction Amount</p>
+                        <p class="text-sm">₹ ${transactionAmount}/-</p>
+                    </div>
+
+                    <hr class="border-gray-300 w-full mt-4 mb-4" />
+
+                    <table class="table-auto w-full border mt-2">
+                        <thead>
+                            <tr>
+                                <th class="px-4 py-2">Event Name</th>
+                                <th class="px-4 py-2">Total Members</th>
+                                <th class="px-4 py-2">Amount</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            ${splitUp.map((item, index) => {
+                    return `<tr key=${index}>
+                                        <td class="border px-4 py-2">${item.eventName}</td>
+                                        <td class="border px-4 py-2">${item.totalMembers}</td>
+                                        <td class="border px-4 py-2 text-end">₹ ${item.amount}/-</td>
+                                    </tr>`
+                }).join("")}
+                            <tr key=100>
+                                        <td class="border px-4 py-2">Total</td>
+                                        <td class="border px-4 py-2"></td>
+                                        <td class="border px-4 py-2 text-end">₹ ${transactionAmount}/-</td>
+                            </tr>
+                        </tbody>
+                    </table>
+                </div>
+                `
+
+                buildDialog("Event Registration Receipt", receipt, 'Okay', true);
+                openModal();
+
+            } else if (response.status === 401) {
+                secureLocalStorage.clear();
+                buildDialog("Session Expired", "Your session has expired. Please login again.", 'Okay')
+                openModal();
+
+                setTimeout(() => {
+                    router.push('/auth/login');
+                }, 2000);
+            } else if (response.status === 400) {
+                const data = await response.json();
+
+                if (data["ERROR"]) {
+                    buildDialog("Error", data["ERROR"], 'Okay')
+                    openModal();
+                } else {
+                    buildDialog("Error", "Something went wrong", 'Okay')
+                    openModal();
+                }
+            } else {
+                buildDialog("Error", "Something went wrong", 'Okay')
+                openModal();
+            }
+
+        } catch (error) {
+            console.log(error)
+            buildDialog("Error", "Something went wrong", 'Okay')
+            openModal();
+        } finally {
+
+        }
+    }
+
+    return <div key={key} className={"border flex flex-col rounded-xl backdrop-blur-xl bg-gray-50 w-72"} >
         <div>
             <Image src={`/event/${eventId}.png`} width={300} height={300} className="rounded-t-xl max-h-100" alt={eventId + "_im"} />
         </div>
@@ -52,6 +175,6 @@ export default function RegisteredEventCard({
             <p className="text-sm">{totalMembers + (totalMembers === 1 ? " member" : " members")}</p>
         </div>
         <hr className="border-gray-300 w-full" />
-        <button className="font-sm text-gray-700 underline">View Receipt</button>
+        <button onClick={getEventRegistrationReceipt} className="font-sm text-gray-700 underline">View Receipt</button>
     </div>;
 }
