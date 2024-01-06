@@ -4,10 +4,11 @@ const nextConfig = {
         serverActions: {
             allowedOrigins: [
                 'localhost:3000',
-                'test.payu.in'
+                'test.payu.in',
+                'testtxncdn.payubiz.in',
             ]
         }
-    }
+    },
 }
 
 module.exports = nextConfig
