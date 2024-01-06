@@ -188,7 +188,7 @@ export default function EventsScreen() {
                     <input
                         type="text"
                         placeholder="Search by Event Name"
-                        className="border border-gray-200 rounded-xl p-2 w-64 text-lg"
+                        className="border bg-white rounded-xl p-3 w-96 text-lg"
                         value={searchText}
                         onChange={(e) => {
                             setSearchText(e.target.value);

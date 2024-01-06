@@ -6,6 +6,7 @@ const nextConfig = {
                 'localhost:3000',
                 'test.payu.in',
                 'testtxncdn.payubiz.in',
+                '*.payu.in',
             ]
         }
     },
