@@ -4,6 +4,7 @@ import DialogModal from "@/components/DialogModal";
 import NavBar from "@/components/NavBar";
 import RegisteredEventCard from "@/components/RegisteredEventCard";
 import { USER_EVENTS_URL, USER_PROFILE_URL } from "@/components/constants";
+import Image from "next/image";
 import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -143,7 +144,7 @@ export default function UserScreen() {
             <NavBar />
             <main>
                 <div className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow lg:flex-row  hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 justify-center w-fit ml-auto mr-auto mt-8" >
-                    <img src={`https://www.gravatar.com/avatar/${hash}.jpg?s=200&d=robohash`} alt="Profile" width={200} className="rounded-lg"></img>
+                    <Image src={`https://www.gravatar.com/avatar/${hash}.jpg?s=200&d=robohash`} alt="Profile" width={200} height={200} className="rounded-lg"></Image>
                     <div className="flex flex-col justify-between p-4 leading-normal">
                         <h5 className="mb-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white">{userFullName}</h5>
                         <p className="mb-1 font-normal text-gray-700 dark:text-gray-400">{userRollNumber}</p>
