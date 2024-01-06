@@ -13,7 +13,7 @@ export default function Home() {
         </div>
         <iframe className="w-[90%] h-[78%] m-auto rounded-2xl overflow-visible" src="https://drive.google.com/file/d/1SANYrGrQqfs7WAOUIKKjMOZmOyVD1vSM/preview" allow="autoplay"></iframe>
       </main>
-      <Footer />
+      {/* <Footer /> */}
     </>
   )
 }
