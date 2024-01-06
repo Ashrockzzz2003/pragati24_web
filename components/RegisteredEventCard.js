@@ -79,7 +79,7 @@ export default function RegisteredEventCard({
 
                     <hr class="border-gray-300 w-full mt-4 mb-4" />
 
-                    <table class="table-auto w-full border mt-2">
+                    <table class="table-auto w-full border mt-2 text-sm">
                         <thead>
                             <tr>
                                 <th class="px-4 py-2">Event Name</th>
@@ -90,15 +90,17 @@ export default function RegisteredEventCard({
                         <tbody>
                             ${splitUp.map((item, index) => {
                     return `<tr key=${index}>
-                                        <td class="border px-4 py-2">${item.eventName}</td>
-                                        <td class="border px-4 py-2">${item.totalMembers}</td>
-                                        <td class="border px-4 py-2 text-end">₹ ${item.amount}/-</td>
+                                        <td class="border px-2 py-2">${item.eventName}</td>
+                                        <td class="border px-2 py-2">${item.totalMembers}</td>
+                                        <td class="border px-2 py-2 text-end">₹ ${item.amount}/-</td>
                                     </tr>`
                 }).join("")}
                             <tr key=100>
-                                        <td class="border px-4 py-2">Total</td>
-                                        <td class="border px-4 py-2"></td>
-                                        <td class="border px-4 py-2 text-end">₹ ${transactionAmount}/-</td>
+                                        <td class="border px-2 py-2">Total</td>
+                                        <td class="border px-2 py-2 text-end" colSpan=2>
+                                            <p>₹ ${transactionAmount}/-</p>
+                                            <p class="text-xs text-gray-500 text-end">Inclusive of GST</p>
+                                        </td>
                             </tr>
                         </tbody>
                     </table>
