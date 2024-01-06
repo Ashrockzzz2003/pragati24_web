@@ -88,9 +88,13 @@ export default function LoginScreen() {
 
                 return;
             } else if (response.status === 400) {
-                buildDialog('Invalid Email/Password', 'Please enter a valid EmailID/Password to continue', 'Okay');
-                openModal();
-                return;
+                const data = await response.json();
+
+                if (data["ERROR"]) {
+                    buildDialog('Error', data["ERROR"], 'Okay');
+                    openModal();
+                    return;
+                }
             } else if (response.status === 401) {
                 buildDialog('Invalid Credentials', 'Please enter your valid EmailID/Password to continue', 'Okay');
                 openModal();

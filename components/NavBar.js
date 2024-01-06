@@ -15,7 +15,7 @@ export default function NavBar() {
 
     useEffect(() => {
         secureLocalStorage.getItem("pragathi-t") && secureLocalStorage.getItem("pragathi-ue") && secureLocalStorage.getItem("pragathi-ur") && setIsLoggedIn(true) && setUserRoleId(secureLocalStorage.getItem("pragathi-ur"));
-    }, [])
+    }, []);
 
     return (
         <header className="flex justify-center items-center w-fit ml-auto mr-auto sticky z-40 top-0 mt-2">

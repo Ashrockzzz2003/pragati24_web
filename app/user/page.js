@@ -56,7 +56,7 @@ export default function UserScreen() {
         }).then((response) => {
             if (response.status === 200) {
                 response.json().then((data) => {
-                    console.log(data);
+                    // console.log(data);
                     setUserFullName(data["data"][0].userFullName);
                     setUserEmail(data["data"][0].userEmail);
                     setHash(crypto.createHash('md5').update(data["data"][0].userEmail).digest("hex"));
