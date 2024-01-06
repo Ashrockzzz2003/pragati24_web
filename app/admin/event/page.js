@@ -1,6 +1,6 @@
 "use client";
 
-import AdminNavBar from "@/components/AdminNavbar";
+import NavBar from "@/components/NavBar";
 import { ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL, ADMIN_EVENTS_URL } from "@/components/constants";
 import { useRouter } from "next/navigation";
 import { useState, useEffect } from "react";
@@ -32,6 +32,7 @@ export default function EventsScreen() {
     }
 
     const [eventsData, setEventsData] = useState([]);
+    const [filteredEventsData, setFilteredEventsData] = useState([]);
 
     useEffect(() => {
         fetch(ADMIN_EVENTS_URL, {
@@ -44,6 +45,7 @@ export default function EventsScreen() {
             if (response.status === 200) {
                 response.json().then((data) => {
                     setEventsData(data["data"]);
+                    setFilteredEventsData(data["data"]);
                 });
             } else if (response.status === 401) {
                 secureLocalStorage.clear();
@@ -71,7 +73,7 @@ export default function EventsScreen() {
                 },
                 body: JSON.stringify({ eventId: eventId }),
             });
-    
+
             if (response.status === 200) {
                 const data = await response.json();
 
@@ -88,6 +90,7 @@ export default function EventsScreen() {
                 const csvData = data["data"].map((participant) => {
                     return {
                         "Transaction ID": participant.transactionId,
+                        "Roll Number": participant.userRollNumber,
                         "Full Name": participant.userFullName,
                         "Email": participant.userEmail,
                         "Phone": participant.userPhone,
@@ -99,6 +102,7 @@ export default function EventsScreen() {
 
                 const csvFields = [
                     "Transaction ID",
+                    "Roll Number",
                     "Full Name",
                     "Email",
                     "Phone",
@@ -110,10 +114,10 @@ export default function EventsScreen() {
                 const csv = csvData.map(row => csvFields.map(fieldName => JSON.stringify(row[fieldName], null, 2)).join(','));
                 csv.unshift(csvFields.join(','));
                 const csvArray = csv.join('\r\n');
-                
+
                 const a = document.createElement('a');
-                const file = new Blob([csvArray], {type: 'text/csv'});
-                a.href= URL.createObjectURL(file);
+                const file = new Blob([csvArray], { type: 'text/csv' });
+                a.href = URL.createObjectURL(file);
                 a.download = `event-${eventId}-participants-list-${new Date().getTime()}.csv`
                 a.click();
 
@@ -127,7 +131,7 @@ export default function EventsScreen() {
                 secureLocalStorage.clear();
                 buildDialog('Session Expired', 'Please login again to continue', 'Okay');
                 openModal();
-    
+
                 setTimeout(() => {
                     router.push("/login");
                 }, 3000);
@@ -153,9 +157,17 @@ export default function EventsScreen() {
         }
     }
 
+    const [searchText, setSearchText] = useState('');
+
+    useEffect(() => {
+        setFilteredEventsData(eventsData.filter((eventD) => {
+            return eventD.eventName.toLowerCase().includes(searchText.toLowerCase());
+        }));
+    }, [searchText, eventsData]);
+
     return (
         <>
-            <AdminNavBar />
+            <NavBar />
             <main className="h-full">
                 <div
                     className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
@@ -170,10 +182,23 @@ export default function EventsScreen() {
                     />
                 </div>
 
-                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragathi 2024 | Events Data</h1>
-                {eventsData.length === 0 ? (
+                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragati 2024 | Events Data</h1>
+                {/* Big Search Bar */}
+                <div className="flex flex-row justify-center items-center gap-4 mb-8">
+                    <input
+                        type="text"
+                        placeholder="Search by Event Name"
+                        className="border border-gray-200 rounded-xl p-2 w-64 text-lg"
+                        value={searchText}
+                        onChange={(e) => {
+                            setSearchText(e.target.value);
+                        }}
+                    />
+                </div>
+
+                {filteredEventsData.length === 0 ? (
                     <div className='mx-auto'>
-                        <p className="p-8 text-center text-lime-100">Loading ... </p>
+                        <p className="p-8 text-center text-lime-100"> ... </p>
                     </div>
                 ) : (
                     <table className="mx-auto max-w-11/12 border-collapse">
@@ -190,7 +215,7 @@ export default function EventsScreen() {
                             </tr>
                         </thead>
                         <tbody className="bg-white">
-                            {eventsData.map((eventD, index) => (
+                            {filteredEventsData.map((eventD, index) => (
                                 <tr key={index}>
                                     <td className="p-2 text-center border">{eventD.eventId}</td>
                                     <td className="p-2 text-center border">{eventD.eventName}</td>
@@ -210,7 +235,16 @@ export default function EventsScreen() {
                                     <td className="p-2 text-center border">{eventD.noOfRegistrations}</td>
                                     <td className="p-2 text-center border">{eventD.maxRegistrationCount}</td>
                                     <td className="p-2 text-center border">
-                                        <button onClick={() => {downloadParitcipantsList(eventD.eventId, eventD.eventPrice, eventD.priceMeasureType)}} className="bg-blue-100 text-[#0f113d] flex flex-row rounded-lg py-2 px-2 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit mr-2">
+                                        <button onClick={() => { 
+                                            if (eventD.noOfRegistrations > 0) {
+                                                downloadParitcipantsList(eventD.eventId, eventD.eventPrice, eventD.priceMeasureType)
+                                            } else {
+                                                buildDialog('Error', 'No Participants Registered yet.', 'Okay');
+                                                openModal();
+                                            }
+                                         }} className={"bg-blue-100 text-[#0f113d] flex flex-row rounded-lg py-2 px-2 justify-between items-center align-middle hover:bg-opacity-80 h-fit mr-2 disabled:bg-gray-100 disabled:text-gray-400" + (eventD.noOfRegistrations <= 0 ? " cursor-not-allowed" : " cursor-pointer")}
+                                         disabled={eventD.noOfRegistrations <= 0 ? true : false}
+                                         >
                                             <span className="material-icons mr-2">download</span>
                                             <p className="text-sm">Download Participants</p>
                                         </button>

@@ -1,7 +1,7 @@
 "use client";
 
-import AdminNavBar from "@/components/AdminNavbar";
 import DialogModal from "@/components/DialogModal";
+import NavBar from "@/components/NavBar";
 import { USER_PROFILE_URL } from "@/components/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
@@ -81,7 +81,7 @@ export default function AdminScreen() {
 
     return (
         <>
-            <AdminNavBar />
+            <NavBar />
             <main>
                 <div className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow lg:flex-row  hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 justify-center w-fit ml-auto mr-auto mt-16" >
                     <img src={`https://www.gravatar.com/avatar/${hash}.jpg?s=200&d=robohash`} alt="Profile" width={200} className="rounded-lg"></img>
