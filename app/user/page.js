@@ -55,6 +55,7 @@ export default function UserScreen() {
         }).then((response) => {
             if (response.status === 200) {
                 response.json().then((data) => {
+                    console.log(data);
                     setUserFullName(data["data"][0].userFullName);
                     setUserEmail(data["data"][0].userEmail);
                     setHash(crypto.createHash('md5').update(data["data"][0].userEmail).digest("hex"));
@@ -67,6 +68,7 @@ export default function UserScreen() {
                     secureLocalStorage.setItem('pragathi-ue', data["data"][0].userEmail);
                     secureLocalStorage.setItem('pragathi-ph', data["data"][0].userPhone);
                     secureLocalStorage.setItem('pragathi-urn', data["data"][0].userRollNumber);
+                    secureLocalStorage.setItem('pragathi-ua', data["data"][0].userAccountStatus);
 
                     fetch(USER_EVENTS_URL, {
                         method: "POST",
@@ -167,8 +169,8 @@ export default function UserScreen() {
                 </div>
 
                 <h1 className="mb-1 pt-8 text-2xl text-lime-50 text-center">My Registered Events</h1>
-                <div className='mx-auto'>
-                    <p className="p-8 text-center text-lime-100">Reload after 5-mins if you have registered and it does not show up here.</p>
+                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
+                    <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"Reload after 5-mins if you have registered for events and it does not show up here."}</p>
                 </div>
                 <div className="relative mx-6 my-2 py-2 flex flex-wrap justify-center gap-4 items-center md:mx-16">
                     {eventData.length <= 0 ? <div className='mx-auto'>

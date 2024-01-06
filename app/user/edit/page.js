@@ -1,7 +1,6 @@
 "use client";
 
 import DialogModal from "@/components/DialogModal";
-import Link from "next/link";
 import { useEffect, useState } from "react";
 import validator from 'validator';
 import 'material-icons/iconfont/material-icons.css';
@@ -60,7 +59,7 @@ export default function EditProfileScreen() {
     const handleEditProfile = async (e) => {
         e.preventDefault();
 
-        if (!isValidName || !isValidPhone || !isValidRollNumber) {
+        if (!isValidName || !isValidPhone) {
             buildDialog('Invalid Name or Mobile Number', 'Please enter a valid Name/MobileNumber to continue', 'Okay');
             openModal();
             return;
