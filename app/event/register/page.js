@@ -93,6 +93,10 @@ export default function RegisterEventScreen() {
                 console.log(err);
                 buildDialog('Alert', 'You must login to register to events!', 'OK');
                 openModal();
+
+                setTimeout(() => {
+                    router.push('/auth/login');
+                }, 3000);
             })
     }, [router]);
 

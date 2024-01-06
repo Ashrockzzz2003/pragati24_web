@@ -4,6 +4,7 @@ import DialogModal from "@/components/DialogModal";
 import NavBar from "@/components/NavBar";
 import RegisteredEventCard from "@/components/RegisteredEventCard";
 import { USER_EVENTS_URL, USER_PROFILE_URL } from "@/components/constants";
+import Link from "next/link";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import secureLocalStorage from "react-secure-storage";
@@ -28,7 +29,7 @@ export default function UserScreen() {
 
     const router = useRouter();
 
-    const buildDialog = (title, message, buttonLabel, isReceipt=false) => {
+    const buildDialog = (title, message, buttonLabel, isReceipt = false) => {
         setTitle(title);
         setMessage(message);
         setButtonLabel(buttonLabel);
@@ -166,6 +167,12 @@ export default function UserScreen() {
                             Edit Profile
                         </button>
                     </div>
+                </div>
+                <div className="flex flex-col items-center bg-white border border-gray-200 rounded-lg shadow lg:flex-row  hover:bg-gray-100 dark:border-gray-700 dark:bg-gray-800 dark:hover:bg-gray-700 justify-center w-fit ml-auto mr-auto mt-8" >
+                    <Link href="/user/transactions" className="flex flex-col justify-between p-4 leading-normal">
+                        <h5 className="mb-1 text-2xl font-bold tracking-tight text-gray-900 dark:text-white text-center">My Transactions</h5>
+                        <p className="mb-1 font-normal text-gray-700 dark:text-gray-400">View status of your transactions</p>
+                    </Link>
                 </div>
 
                 <h1 className="mb-1 pt-8 text-2xl text-lime-50 text-center">My Registered Events</h1>

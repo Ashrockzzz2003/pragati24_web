@@ -15,6 +15,7 @@ const EVENT_RECEIPT_URL = `${USER_URL}/event/receipt`;
 const USER_PROFILE_URL = `${USER_URL}/profile`;
 const USER_EVENTS_URL = `${USER_URL}/profile/event`;
 const EDIT_PROFILE_URL = `${USER_URL}/profile/edit`;
+const USER_TRANSACTIONS_URL = `${USER_URL}/profile/transactions`;
 
 const ADMIN_EVENTS_URL = `${BASE_URL}/admin/event/all`;
 const ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL = `${BASE_URL}/admin/event/participants`;
@@ -32,5 +33,6 @@ export {
     EDIT_PROFILE_URL,
     EVENT_RECEIPT_URL,
     ADMIN_EVENTS_URL,
-    ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL
+    ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL,
+    USER_TRANSACTIONS_URL,
 };
