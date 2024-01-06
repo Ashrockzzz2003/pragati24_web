@@ -81,9 +81,13 @@ export default function RegisterEventScreen() {
 
                 setIsSelected(temp);
 
-                if (secureLocalStorage.getItem('pragathi-ua') === '0') {
-                    setTotalAmount(60);
+                if (data["userAccountStatus"] === '1' || data["userAccountStatus"] === '2' || data["userAccountStatus"] === '0') {
+                    secureLocalStorage.setItem('pragathi-ua', data["userAccountStatus"]);
+                    if (data["userAccountStatus"] === '0') {
+                        setTotalAmount(60);
+                    }
                 }
+
             })
             .catch(err => {
                 console.log(err);
@@ -92,13 +96,16 @@ export default function RegisterEventScreen() {
             })
     }, [router]);
 
+    const [searchText, setSearchText] = useState('');
+
     useEffect(() => {
         if (eventsData.length) {
             setFilteredEventsData(eventsData.filter((eventD) => {
-                return isSelected[eventD["eventId"]] === false;
+                return  (isSelected[eventD["eventId"]] === false) && 
+                        (searchText === null || searchText === "" || eventD["eventName"].toLowerCase().includes(searchText.toLowerCase()));
             }));
         }
-    }, [isSelected, eventsData]);
+    }, [isSelected, eventsData, searchText]);
 
     const registerToEvent = (eventId, eventName, eventPrice, priceMeasureType, minSize, maxSize) => {
         if (minSize === maxSize) {
@@ -162,7 +169,6 @@ export default function RegisterEventScreen() {
 
 
     const moveToTransaction = async () => {
-
         try {
             // main multi dimensional array
             let finalToTransactionArray = [];
@@ -231,8 +237,12 @@ export default function RegisterEventScreen() {
 
                 document.body.appendChild(payUForm);
 
-                secureLocalStorage.clear(); // logout before going to payU. This is to prevent user from going back to the registration page after paying.
+                // secureLocalStorage.clear(); // logout before going to payU. This is to prevent user from going back to the registration page after paying.
                 payUForm.submit();
+            } else if (response.status === 201 ) {
+                const data = await response.json();
+
+                router.push('/event/register/success');
             } else if (response.status === 401) {
                 buildDialog('Session Expired', 'Please Login to continue.', 'Okay');
                 openModal();
@@ -279,15 +289,21 @@ export default function RegisterEventScreen() {
                 </div>
 
                 {/* Info Box regarding mandatory registration fee of 60 rs */}
-                {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
+                {secureLocalStorage.getItem('pragathi-ua') !== '1' ? (
                     <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
                         <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
                             <p className="text-xl font-medium">{"Registration Fee"}</p>
                             <p className="text-xl font-medium">{"₹ 60"}</p>
                         </div>
-                        <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"Note: You have to pay a mandatory registration fee of ₹ 60 to register to events."}</p>
+                        <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"You have to pay a mandatory registration fee of ₹ 60 to register to events."}</p>
+                        <hr className="my-2" />
+                        <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"If you have already paid and still see this message, please allow us upto 5 mins to process your payment. Refresh your page after 5 mins."}</p>
                     </div>
                 ) : null}
+
+                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
+                    <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"Note: Head to your profile to see events registered by you."}</p>
+                </div>
 
 
                 {selectedEvents.length > 0 ? (
@@ -298,7 +314,8 @@ export default function RegisterEventScreen() {
                                 <tr className="bg-black text-white bg-opacity-90 backdrop-blur-xl">
                                     <th className="px-2 py-1 rounded-tl-2xl border-black">Event</th>
                                     <th className="px-2 py-1 border-b-black">Members</th>
-                                    <th className="px-2 py-1 border-b-black">Cost</th>
+                                    <th className="px-2 py-1 border-b-black">Price</th>
+                                    <th className="px-2 py-1 border-b-black">Total Cost</th>
                                     <th className="px-2 py-1 border-b-black rounded-tr-2xl">Action</th>
                                 </tr>
                             </thead>
@@ -307,6 +324,7 @@ export default function RegisterEventScreen() {
                                     <tr className="bg-white">
                                         <td className={"border border-gray-200 px-2 py-1"} >{"Registration Fee"}</td>
                                         <td className="border border-gray-200 px-2 py-1">{1}</td>
+                                        <td className={"border border-gray-200 px-2 py-1 text-end"} >{"₹ 60 /head"}</td>
                                         <td className={"border border-gray-200 px-2 py-1"} >{"₹ 60"}</td>
                                         <td className={"border border-gray-200 px-2 py-1"} >
                                             -
@@ -316,8 +334,9 @@ export default function RegisterEventScreen() {
                                 {selectedEvents.map((eventD, index) => {
                                     return (
                                         <tr key={index} className="bg-white">
-                                            <td className={"border border-gray-200 px-2 py-1 max-w-8 md:max-w-full" + (index === selectedEvents.length - 1 ? "border-separate rounded-bl-2xl" : "")} >{eventD["eventName"]}</td>
+                                            <td className={"border border-gray-200 px-2 py-1 max-w-[160px] md:max-w-full" + (index === selectedEvents.length - 1 ? "border-separate rounded-bl-2xl" : "")} >{eventD["eventName"]}</td>
                                             <td className="border border-gray-200 px-2 py-1">{eventD["totalMembers"]}</td>
+                                            <td className={"border border-gray-200 px-2 py-1"} >{"₹ " + eventD["eventPrice"]} {eventD["priceMeasureType"] === '0' ? "/head" : "/team"}</td>
                                             <td className={"border border-gray-200 px-2 py-1"} >{"₹ " + (eventD["priceMeasureType"] === '1' ? eventD["eventPrice"] : eventD["eventPrice"] * eventD["totalMembers"])}</td>
                                             <td className={"border border-gray-200 px-2 py-1" + (index === selectedEvents.length - 1 ? "border-separate rounded-br-2xl" : "")} >
                                                 <div onClick={() => {
@@ -333,8 +352,9 @@ export default function RegisterEventScreen() {
                         </table>
 
                         <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto">
-                            <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
+                            <div className="flex flex-col justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
                                 <p className="text-xl font-medium">{"Total Amount " + "₹ " + totalAmount}</p>
+                                <p className="text-xs text-gray-500 text-end">Inclusive of GST</p>
                             </div>
                             <div className="flex flex-row justify-center items-center gap-4">
                                 <button onClick={() => {
@@ -366,13 +386,40 @@ export default function RegisterEventScreen() {
                     </>
                 ) : null}
 
-                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragathi 2024 | Register to Events</h1>
+                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragati 2024 | Register to Events</h1>
+                {/* Big Search Bar */}
+                <div className="flex flex-row justify-center items-center gap-4">
+                    <input
+                        type="text"
+                        placeholder="Search by Event Name"
+                        className="border bg-white rounded-xl p-3 w-96 text-lg"
+                        value={searchText}
+                        onChange={(e) => {
+                            setSearchText(e.target.value);
+                        }}
+                    />
+                </div>
                 <div className="relative mx-6 my-8 py-2 flex flex-wrap justify-center gap-4 items-center md:mx-16">
                     {filteredEventsData.length === 0 ? (
                         <div className='mx-auto'>
-                            <p className="p-8 text-center text-lime-100">Loading ... </p>
+                            <p className="p-8 text-center text-lime-100"> ... </p>
                         </div>
-                    ) : (
+                    ) : [
+                        // <div key={-1} className="flex flex-row justify-center items-center gap-4">
+                        //     <input
+                        //         type="text"
+                        //         placeholder="Search"
+                        //         className="border border-gray-200 rounded-xl p-2 w-64"
+                        //         value={searchText}
+                        //         onChange={(e) => {
+                        //             setSearchText(e.target.value);
+                        //         }}
+                        //     />
+                        //     <div>
+                        //         <span className="material-icons">search</span>
+                        //         <span>Search</span>
+                        //     </div>
+                        // </div>,
                         filteredEventsData.map((eventD, index) => {
                             return (
                                 <EventCard
@@ -397,7 +444,7 @@ export default function RegisterEventScreen() {
                                 />
                             )
                         })
-                    )}
+                    ]}
                 </div>
 
                 <DialogModal

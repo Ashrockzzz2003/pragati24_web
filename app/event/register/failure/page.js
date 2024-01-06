@@ -1,3 +1,5 @@
+"use client";
+
 import Link from "next/link";
 import 'material-icons/iconfont/material-icons.css';
 
@@ -9,13 +11,13 @@ export default function PaymentFailure() {
                     <div className="flex items-center justify-center">
                         <i className="material-icons text-red-500" style={{"fontSize": "128px"}}>cancel</i>
                     </div>
-                    <h2 className="mt-8 text-center justify-center">Payment Failed !</h2>
-                    <p className="text-gray-700 text-sm">Please try again later! </p>
+                    <h2 className="mt-8 text-center justify-center">Payment Failed</h2>
+                    <p className="text-gray-700 text-sm">Please try again later.</p>
                 </>
 
                 <Link href={"/"} className="flex justify-center">
                     <button
-                        className="rounded px-6 py-4"
+                        className="rounded-2xl px-2 py-3"
                         style={{ backgroundColor: "#00223a", color: "white", marginTop: "1rem" }}>
                         Back to Home
                     </button>
