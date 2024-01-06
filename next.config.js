@@ -3,8 +3,9 @@ const nextConfig = {
     experimental: {
         serverActions: {
             allowedOrigins: [
-                '*localhost',
-                '*.payu.in',
+                'localhost',
+                'test.payu.in',
+                'testtxncdn.payubiz.in'
             ]
         }
     },
@@ -13,8 +14,13 @@ const nextConfig = {
             {
                 protocol: 'https',
                 hostname: '**.gravatar.com',
+                port: '',
+                pathname: '/avatar/**',
             },
         ],
+        domains: [
+            'www.gravatar.com',
+        ]
     },
 }
 
