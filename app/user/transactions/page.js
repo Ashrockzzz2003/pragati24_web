@@ -114,7 +114,10 @@ export default function TransactionsScreen() {
                         {transactionData.map((transaction, index) => (
                             <tr key={index} className="bg-white">
                                 <td className={"border border-gray-200 px-2 py-2" + (index === transactionData.length - 1 ? "border-separate rounded-bl-2xl" : "")}>{transaction.txnid}</td>
-                                <td className="border border-gray-200 px-2 py-2">{new Date(transaction.createdAt).toDateString()}</td>
+                                <td className="border border-gray-200 px-2 py-2"><div>
+                                    <p className="text-center">{new Date(transaction.createdAt).toDateString()}</p>
+                                    <p className="text-xs text-gray-500 text-center">{new Date(transaction.createdAt).toLocaleTimeString()}</p>
+                                </div></td>
                                 <td className="border border-gray-200 px-2 py-2">{"₹ " + transaction.amount + " /-"}</td>
                                 <td className={"border border-gray-200 px-2 py-2" + (index === transactionData.length - 1 ? "border-separate rounded-br-2xl" : "")}>
                                     {transaction.transactionStatus === '1' ? (
