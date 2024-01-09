@@ -5,7 +5,10 @@ const nextConfig = {
             allowedOrigins: [
                 'localhost',
                 'test.payu.in',
-                'testtxncdn.payubiz.in'
+                'testtxncdn.payubiz.in',
+                'secure.payu.in',
+                'txncdn.payu.in',
+                'pragati.amrita.edu',
             ]
         }
     },
