@@ -1,6 +1,6 @@
 # Pragathi 2k24
 
-MBA Techfest Website.
+MBA Fest Website.
 
 ## Installation
 
