@@ -1,6 +1,16 @@
-# Pragathi 2k24
+# Pragati 2k24
 
 MBA Techfest Website.
+
+## Tech Stack
+
+[Link to BackEnd GitHub Repository](https://github.com/Ashrockzzz2003/pragati_backend_2024)
+
+| Purpose | Tech |
+| --- | --- |
+| Backend | `ExpressJS`, `MySQL` |
+| Frontend | `NextJS`, `TailwindJS`, `PayU` |
+| Deployment | `nginx` |
 
 ## Installation
 
