@@ -76,6 +76,10 @@ export default function RegisteredEventCard({
                         <p class="text-sm">Transaction Amount</p>
                         <p class="text-sm">₹ ${transactionAmount}/-</p>
                     </div>
+                    ${eventId.toString() === '9' ? `<div class="flex flex-row justify-between">
+                    <p class="text-sm">Auction Mania Date</p>
+                    <p class="text-sm">${data["data"].whichDay === '1' ? "Feb 17th" : "Feb 16th"}, 2024</p>
+                </div>` : ``}
 
                     <hr class="border-gray-300 w-full mt-4 mb-4" />
 
@@ -93,6 +97,7 @@ export default function RegisteredEventCard({
                                         <td class="border px-2 py-2">${item.eventName}</td>
                                         <td class="border px-2 py-2">${item.totalMembers}</td>
                                         <td class="border px-2 py-2 text-end">₹ ${item.amount}/-</td>
+                                        
                                     </tr>`
                 }).join("")}
                             <tr key=100>

@@ -11,8 +11,8 @@ export default function PaymentPending() {
                     <i className="material-icons text-orange-500" style={{ "fontSize": "128px" }}>info</i>
                 </div>
                 <h1 className="mt-8 text-center justify-center text-4xl fonr-bold mb-4">Payment Pending</h1>
-                <p className="text-gray-700 text-sm text-center">Please allow us up to 5 minutes to receive confirmation of your payment.</p>
-                <p className="text-gray-700 text-sm text-center">You can check the status in the transactions page under your profile.</p>
+                <p className="text-gray-700 text-sm text-center">{"Head over to your Profile then click on My Transactions."}</p>
+                <p className="text-gray-700 text-sm text-center">{"Click on Verify Now to the corresponding transaction to complete the registration."}</p>
             </>
 
             <Link href={"/"} className="flex justify-center">

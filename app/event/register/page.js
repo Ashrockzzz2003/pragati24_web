@@ -4,10 +4,12 @@ import DialogModal from "@/components/DialogModal";
 import EventCard from "@/components/EventCard";
 import NavBar from "@/components/NavBar";
 import { GET_EVENTS_URL, REGISTER_EVENT_URL } from "@/components/constants";
-import { payUKey } from "@/components/payU";
+import { payUProductionKey, payUTestKey } from "@/components/payU";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import secureLocalStorage from "react-secure-storage";
+import 'material-icons/iconfont/material-icons.css';
+import Link from "next/link";
 
 export default function RegisterEventScreen() {
 
@@ -40,6 +42,8 @@ export default function RegisterEventScreen() {
     const [isSelected, setIsSelected] = useState({});
     const [totalAmount, setTotalAmount] = useState(0);
 
+    const [whichDay, setWhichDay] = useState('-1');
+
     // Check if Logged In
     useEffect(() => {
         fetch(GET_EVENTS_URL, {
@@ -66,7 +70,7 @@ export default function RegisterEventScreen() {
                 return res.json();
             } else {
                 alert('Something went wrong');
-                router.push('/login');
+                router.push('/auth/login');
             }
         })
             .then(data => {
@@ -83,9 +87,9 @@ export default function RegisterEventScreen() {
 
                 if (data["userAccountStatus"] === '1' || data["userAccountStatus"] === '2' || data["userAccountStatus"] === '0') {
                     secureLocalStorage.setItem('pragathi-ua', data["userAccountStatus"]);
-                    if (data["userAccountStatus"] === '0') {
-                        setTotalAmount(60);
-                    }
+                    // if (data["userAccountStatus"] === '0') {
+                    //     setTotalAmount(60);
+                    // } // REG FEE COMMENTED
                 }
 
             })
@@ -105,8 +109,8 @@ export default function RegisterEventScreen() {
     useEffect(() => {
         if (eventsData.length) {
             setFilteredEventsData(eventsData.filter((eventD) => {
-                return  (isSelected[eventD["eventId"]] === false) && 
-                        (searchText === null || searchText === "" || eventD["eventName"].toLowerCase().includes(searchText.toLowerCase()));
+                return (isSelected[eventD["eventId"]] === false) &&
+                    (searchText === null || searchText === "" || eventD["eventName"].toLowerCase().includes(searchText.toLowerCase()));
             }));
         }
     }, [isSelected, eventsData, searchText]);
@@ -130,10 +134,35 @@ export default function RegisterEventScreen() {
                 setTotalAmount(totalAmount + eventPrice * minSize);
             }
 
+            confirm(`${eventName} selected for registration. Scroll Up to the top and proceed to complete your registration.`);
+
         } else {
             // prompt for team size
             let teamSize = prompt(`The team leader alone should register for the event and pay the amount. The team size should be between ${minSize} and ${maxSize}. Enter Number of members in your team`, minSize);
             teamSize = parseInt(teamSize);
+
+            if (eventId.toString() === '9') {
+                let theWhichDay = prompt("Enter the day you want to register for Auction Mania. Enter number 1 for Feb 16th, number 2 for Feb 17th.");
+
+                if (theWhichDay === null) {
+                    return;
+                }
+
+                theWhichDay = parseInt(theWhichDay);
+
+                while (theWhichDay !== 1 && theWhichDay !== 2) {
+                    theWhichDay = prompt("Invalid day. Enter number 1 for Feb 16th, number 2 for Feb 17th.");
+
+                    if (theWhichDay === null) {
+                        return;
+                    }
+
+                    theWhichDay = parseInt(theWhichDay);
+                }
+
+
+                setWhichDay((theWhichDay - 1).toString());
+            }
 
             if (teamSize >= minSize && teamSize <= maxSize) {
                 selectedEvents.push({
@@ -153,6 +182,8 @@ export default function RegisterEventScreen() {
                     setTotalAmount(totalAmount + eventPrice * teamSize);
                 }
 
+                confirm(`${eventName} selected for registration. Scroll Up to the top and proceed to complete your registration`);
+
             } else {
                 buildDialog('Error', 'Invalid Team Size', 'OK');
                 openModal();
@@ -171,8 +202,11 @@ export default function RegisterEventScreen() {
         setIsSelected({ ...isSelected, [eventId]: false });
     }
 
+    const [isLoading, setIsLoading] = useState(false);
 
     const moveToTransaction = async () => {
+        setIsLoading(true);
+
         try {
             // main multi dimensional array
             let finalToTransactionArray = [];
@@ -192,7 +226,8 @@ export default function RegisterEventScreen() {
                     "Authorization": `Bearer ${secureLocalStorage.getItem('pragathi-t')}`
                 },
                 body: JSON.stringify({
-                    "eventList": finalToTransactionArray
+                    "eventList": finalToTransactionArray,
+                    "whichDay": whichDay,
                 })
             });
 
@@ -212,7 +247,8 @@ export default function RegisterEventScreen() {
 
                 // Send to payU
                 const payUData = {
-                    key: payUKey,
+                    // key: payUTestKey,
+                    key: payUProductionKey,
                     txnid: data["txnid"],
                     amount: data["amount"],
                     productinfo: data["productinfo"],
@@ -226,7 +262,8 @@ export default function RegisterEventScreen() {
 
                 const payUForm = document.createElement('form');
                 payUForm.method = 'post';
-                payUForm.action = 'https://test.payu.in/_payment';
+                // payUForm.action = 'https://test.payu.in/_payment';
+                payUForm.action = 'https://secure.payu.in/_payment';
 
                 for (const key in payUData) {
                     if (payUData.hasOwnProperty(key)) {
@@ -243,7 +280,7 @@ export default function RegisterEventScreen() {
 
                 // secureLocalStorage.clear(); // logout before going to payU. This is to prevent user from going back to the registration page after paying.
                 payUForm.submit();
-            } else if (response.status === 201 ) {
+            } else if (response.status === 201) {
                 const data = await response.json();
 
                 router.push('/event/register/success');
@@ -271,6 +308,8 @@ export default function RegisterEventScreen() {
             console.log(error);
             buildDialog('Error', 'Something went wrong!', 'Okay');
             openModal();
+        } finally {
+            setIsLoading(false);
         }
     }
 
@@ -293,7 +332,7 @@ export default function RegisterEventScreen() {
                 </div>
 
                 {/* Info Box regarding mandatory registration fee of 60 rs */}
-                {secureLocalStorage.getItem('pragathi-ua') !== '1' ? (
+                {/* {secureLocalStorage.getItem('pragathi-ua') !== '1' ? (
                     <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
                         <div className="flex flex-row justify-between items-center p-4 bg-gray-50 rounded-xl w-full ml-auto mr-auto mb-2">
                             <p className="text-xl font-medium">{"Registration Fee"}</p>
@@ -301,13 +340,9 @@ export default function RegisterEventScreen() {
                         </div>
                         <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"You have to pay a mandatory registration fee of ₹ 60 to register to events."}</p>
                         <hr className="my-2" />
-                        <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"If you have already paid and still see this message, please allow us upto 5 mins to process your payment. Refresh your page after 5 mins."}</p>
+                        <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"If you have already paid and still see this message, please go to your profile => Transactions and then click on verify now."}</p>
                     </div>
-                ) : null}
-
-                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
-                    <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"Note: Head to your profile to see events registered by you."}</p>
-                </div>
+                ) : null} */}
 
 
                 {selectedEvents.length > 0 ? (
@@ -324,7 +359,7 @@ export default function RegisterEventScreen() {
                                 </tr>
                             </thead>
                             <tbody>
-                                {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
+                                {/* {secureLocalStorage.getItem('pragathi-ua') === '0' ? (
                                     <tr className="bg-white">
                                         <td className={"border border-gray-200 px-2 py-1"} >{"Registration Fee"}</td>
                                         <td className="border border-gray-200 px-2 py-1">{1}</td>
@@ -334,7 +369,7 @@ export default function RegisterEventScreen() {
                                             -
                                         </td>
                                     </tr>
-                                ) : null}
+                                ) : null} */} {/* // REG FEE COMMENTED */}
                                 {selectedEvents.map((eventD, index) => {
                                     return (
                                         <tr key={index} className="bg-white">
@@ -361,12 +396,15 @@ export default function RegisterEventScreen() {
                                 <p className="text-xs text-gray-500 text-end">Inclusive of GST</p>
                             </div>
                             <div className="flex flex-row justify-center items-center gap-4">
-                                <button onClick={() => {
-                                    confirm("Are you sure you want to register to these events?") ? moveToTransaction() : null;
+                                {isLoading == false ? (<button onClick={() => {
+                                    confirm("I confirm that I have taken a look at the schedule and that there is no clash in the timing of events that I've selected. I am well aware that no refunds will be provided in case of any clashes in timings. I am also aware that only team leader should register for the event for group events") ? moveToTransaction() : null;
                                 }} className="bg-green-100 text-[#0f3d0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
                                     <span className="material-icons">check_circle</span>
                                     <span>Confirm</span>
-                                </button>
+                                </button>) : (<button disabled={true} className="bg-green-100 text-[#0f3d0f] flex flex-row rounded-xl py-2 px-3 justify-between items-center align-middle hover:bg-opacity-80 cursor-pointer h-fit">
+                                    <span className="material-icons">check_circle</span>
+                                    <span>Loading...</span>
+                                </button>)}
                                 <button onClick={() => {
                                     setSelectedEvents([]);
                                     let temp = {};
@@ -377,7 +415,7 @@ export default function RegisterEventScreen() {
                                     setIsSelected(temp);
 
                                     if (secureLocalStorage.getItem('pragathi-ua') === '0') {
-                                        setTotalAmount(60);
+                                        // setTotalAmount(60); // REG FEE COMMENTED
                                     } else {
                                         setTotalAmount(0);
                                     }
@@ -390,7 +428,25 @@ export default function RegisterEventScreen() {
                     </>
                 ) : null}
 
-                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragati 2024 | Register to Events</h1>
+                <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">Pragati 2024 | Register for Events</h1>
+
+                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto my-4 mt-8">
+                    <p className="text-md font-medium text-gray-700 max-w-[256px] text-center">{"For group events, only the team leader should register for the event and pay the fee for all."}</p>
+                </div>
+                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto my-4">
+                    <p className="text-md font-medium text-gray-700 max-w-[256px] text-center">{"Please take a look at the schedule to ensure there is no clash of events you're gonna register. There will be no refunds in such cases."}</p>
+                    <Link href="/event/schedule" className="text-lg w-fit ml-auto mr-auto font-semibold text-gray-900 items-center align-middle flex flex-row  border border-gray-400 px-2 py-1 rounded-lg bg-gray-100 mt-4">
+                        <span className="material-icons mr-2">schedule</span>
+                        Events Schedule
+                    </Link>
+                </div>
+                <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto my-4">
+                    <p className="text-md font-medium text-gray-700 max-w-[256px] text-center">{"Note: Head to your profile to see events registered by you."}</p>
+                </div>
+                <div className="flex flex-col bg-red-700 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto my-4">
+                    <p className="text-md font-medium text-red-100 max-w-[256px] text-center">{"Online Registrations are closed now. Only offline registrations are open! You can go to the venue directly and register"}</p>
+                </div>
+
                 {/* Big Search Bar */}
                 <div className="flex flex-row justify-center items-center gap-4">
                     <input

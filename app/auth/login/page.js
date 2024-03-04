@@ -10,6 +10,7 @@ import secureLocalStorage from "react-secure-storage";
 import { hashPassword } from "@/components/hashData";
 import { useRouter } from "next/navigation";
 import NavBar from "@/components/NavBar";
+import LoadingScreen from "@/components/loader";
 
 export default function LoginScreen() {
     // For The AlertDialogModal
@@ -34,7 +35,7 @@ export default function LoginScreen() {
     const isValidPassword = userPassword.length >= 8;
     const isValidEmail = validator.isEmail(userEmail);
 
-    const [buttonState, setButtonState] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const buildDialog = (title, message, buttonLabel) => {
         setTitle(title);
@@ -51,7 +52,7 @@ export default function LoginScreen() {
             return;
         }
 
-        setButtonState(false);
+        setIsLoading(true);
 
         try {
 
@@ -80,7 +81,7 @@ export default function LoginScreen() {
                 if (data["userRoleId"] === 1) {
                     router.push('/admin');
                 } else if (data["userRoleId"] === 2) {
-                    router.push('/user');
+                    router.push('/event/register');
                 } else {
                     buildDialog('Error', 'Something went wrong, please try again later', 'Okay');
                     openModal();
@@ -99,6 +100,10 @@ export default function LoginScreen() {
                 buildDialog('Invalid Credentials', 'Please enter your valid EmailID/Password to continue', 'Okay');
                 openModal();
                 return;
+            } else {
+                buildDialog('Error', 'Something went wrong, please try again later', 'Okay');
+                openModal();
+                return;
             }
 
         } catch (err) {
@@ -106,7 +111,7 @@ export default function LoginScreen() {
             buildDialog('Error', 'Something went wrong, please try again later', 'Okay');
             openModal();
         } finally {
-            setButtonState(true);
+            setIsLoading(false);
         }
     }
 
@@ -116,10 +121,9 @@ export default function LoginScreen() {
         setUserPassword('');
     }, []);
 
-    return (
-        <>
+    return <>
         <NavBar />
-        <main className="flex h-[90vh] flex-1 flex-col justify-center">
+        <main className="flex h-[90vh] flex-1 flex-col justify-center mt-4 md:mt-0">
             <div className="border border-gray-300 rounded-2xl mx-auto w-11/12 sm:max-w-11/12 md:max-w-md lg:max-w-md backdrop-blur-xl bg-gray-50">
                 <div
                     className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
@@ -189,16 +193,21 @@ export default function LoginScreen() {
                         </p>
 
                         <div>
-                            <input
+                            {isLoading == false ? <input
                                 value="Sign In"
                                 type="submit"
-                                disabled={(!isValidEmail || !isValidPassword) && buttonState}
-                                className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
+                                disabled={(!isValidEmail || !isValidPassword)}
+                                className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} /> :
+                                <input
+                                    value="Loading..."
+                                    type="submit"
+                                    disabled={true}
+                                    className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
+                            }
                         </div>
                     </form>
                 </div>
             </div>
-
             <DialogModal
                 isOpen={isOpen}
                 closeModal={closeModal}
@@ -207,6 +216,5 @@ export default function LoginScreen() {
                 buttonLabel={buttonLabel}
             />
         </main>
-        </>
-    );
+    </>;
 }

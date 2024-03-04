@@ -19,8 +19,9 @@ const USER_TRANSACTIONS_URL = `${USER_URL}/profile/transactions`;
 
 const ADMIN_EVENTS_URL = `${BASE_URL}/admin/event/all`;
 const ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL = `${BASE_URL}/admin/event/participants`;
-
+const ADMIN_DOWNLOAD_ALL_PARTICIPANTS_LIST_URL = `${BASE_URL}/admin/event/allParticipants`;
 const VERIFY_TRANSACTIONS_URL = `${USER_URL}/event/register/verify`;
+const ADMIN_ACCOMODATION_URL = `${BASE_URL}/admin/accomodation`;
 
 export {
     LOGIN_URL,
@@ -37,5 +38,7 @@ export {
     ADMIN_EVENTS_URL,
     ADMIN_DOWNLOAD_PARTICIPANTS_LIST_URL,
     USER_TRANSACTIONS_URL,
-    VERIFY_TRANSACTIONS_URL
+    VERIFY_TRANSACTIONS_URL,
+    ADMIN_ACCOMODATION_URL,
+    ADMIN_DOWNLOAD_ALL_PARTICIPANTS_LIST_URL
 };

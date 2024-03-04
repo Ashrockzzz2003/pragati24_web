@@ -1,8 +1,11 @@
-Mentor
+# Pragati 2024
+
+## Mentor
 
 1. Dr. Ritwik M
 
-Developers
+## Developers
 
-1. Ashwin Narayanan S
-2. Vaisakhkrishnan K
+1. Ashwin Narayanan S - [CB.EN.U4CSE21008]
+2. Vaisakhkrishnan K - [CB.EN.U4CSE20069]
+3. Dharma Pravardhana - [CB.EN.U4CSE21116] - Responsive Navbar

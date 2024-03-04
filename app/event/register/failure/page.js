@@ -12,7 +12,7 @@ export default function PaymentFailure() {
                         <i className="material-icons text-red-500" style={{"fontSize": "128px"}}>cancel</i>
                     </div>
                     <h2 className="mt-8 text-center justify-center">Payment Failed</h2>
-                    <p className="text-gray-700 text-sm">Please try again later.</p>
+                    <p className="text-gray-700 text-sm">Please try again later after sometime.</p>
                 </>
 
                 <Link href={"/"} className="flex justify-center">

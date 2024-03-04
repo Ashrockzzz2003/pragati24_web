@@ -30,11 +30,15 @@ export default function EditProfileScreen() {
     const [userFullName, setUserFullName] = useState('');
     const [userPhone, setUserPhone] = useState('');
     const [userRollNumber, setUserRollNumber] = useState('');
+    const [needAccomodation, setNeedAccomodation] = useState("");
+    const [numberOfDays, setNumberOfDays] = useState("1");
+    const [theDay, setTheDay] = useState("0");
 
     const isValidName = validator.isAlpha(userFullName.replace(/\s/g, ''));
     const isValidPhone = validator.isMobilePhone(userPhone, 'en-IN');
+    const isValidNeedAccomodation = (needAccomodation === "0") || (needAccomodation === "1" && numberOfDays === "1" && theDay === "0") || (needAccomodation === "1" && numberOfDays === "1" && theDay === "1") || (needAccomodation === "1" && numberOfDays === "2");
 
-    const [buttonState, setButtonState] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const buildDialog = (title, message, buttonLabel) => {
         setTitle(title);
@@ -43,7 +47,7 @@ export default function EditProfileScreen() {
     }
 
     useEffect(() => {
-        if (!secureLocalStorage.getItem('pragathi-ue') || !secureLocalStorage.getItem('pragathi-fn') || !secureLocalStorage.getItem('pragathi-ph')) {
+        if (!secureLocalStorage.getItem('pragathi-ue') || !secureLocalStorage.getItem('pragathi-fn') || !secureLocalStorage.getItem('pragathi-ph') || !secureLocalStorage.getItem("pragati-nAcco") || !secureLocalStorage.getItem("pragati-nDays") || !secureLocalStorage.getItem("pragati-tDay")) {
             buildDialog('Session Expired', 'Please login again', 'Okay');
             openModal();
             router.push('/auth/login');
@@ -54,6 +58,9 @@ export default function EditProfileScreen() {
         setUserFullName(secureLocalStorage.getItem('pragathi-fn'));
         setUserPhone(secureLocalStorage.getItem('pragathi-ph'));
         setUserRollNumber(secureLocalStorage.getItem('pragathi-urn'));
+        setNeedAccomodation(secureLocalStorage.getItem("pragati-nAcco"));
+        setNumberOfDays(secureLocalStorage.getItem("pragati-nDays"));
+        setTheDay(secureLocalStorage.getItem("pragati-tDay"));
     }, [router]);
 
     const handleEditProfile = async (e) => {
@@ -65,7 +72,17 @@ export default function EditProfileScreen() {
             return;
         }
 
-        setButtonState(false);
+        if (!isValidNeedAccomodation) {
+            buildDialog('Invalid Accomodation Details', 'Please enter valid accomodation details to continue', 'Okay');
+            openModal();
+            return;
+        }
+
+        if (needAccomodation === "1" && !confirm("Accomodation will be provided only if you register for events. Continue?")) {
+            return;
+        }
+
+        setIsLoading(true);
 
         try {
 
@@ -78,7 +95,10 @@ export default function EditProfileScreen() {
                 body: JSON.stringify({
                     userFullName: userFullName,
                     userPhone: userPhone,
-                    userRollNumber: userRollNumber
+                    userRollNumber: userRollNumber,
+                    needAccomodation: needAccomodation,
+                    numberOfDays: numberOfDays,
+                    theDay: theDay
                 })
             });
 
@@ -87,6 +107,9 @@ export default function EditProfileScreen() {
 
                 secureLocalStorage.setItem('pragathi-fn', userFullName);
                 secureLocalStorage.setItem('pragathi-ph', userPhone);
+                secureLocalStorage.setItem('pragati-nAcco', needAccomodation);
+                secureLocalStorage.setItem('pragati-nDays', numberOfDays);
+                secureLocalStorage.setItem('pragati-tDay', theDay);
 
                 router.push('/user');
 
@@ -108,126 +131,214 @@ export default function EditProfileScreen() {
             buildDialog('Error', 'Something went wrong, please try again later', 'Okay');
             openModal();
         } finally {
-            setButtonState(true);
+            setIsLoading(false);
         }
     }
 
     return (
         <>
-        <NavBar />
-        <main className="flex h-[90vh] flex-1 flex-col justify-center">
-            <div className="border border-gray-300 rounded-2xl mx-auto w-11/12 sm:max-w-11/12 md:max-w-md lg:max-w-md backdrop-blur-xl bg-gray-50">
-                <div
-                    className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
-                    aria-hidden="true"
-                >
+            <NavBar />
+            <main className="flex h-[90vh] flex-1 flex-col justify-center">
+                <div className="border border-gray-300 rounded-2xl mx-auto w-11/12 sm:max-w-11/12 md:max-w-md lg:max-w-md backdrop-blur-xl bg-gray-50">
                     <div
-                        className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[64%] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#a8abce] to-[#a9afde] opacity-10"
-                        style={{
-                            clipPath:
-                                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%, 45.2% 34.5%)',
-                        }}
-                    />
-                </div>
-
-                <div className="mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md">
-                    <div className='flex flex-row justify-center'>
-                        <h1 className='px-4 py-4 w-full text-2xl font-semibold text-center text-black'>Edit Profile</h1>
+                        className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
+                        aria-hidden="true"
+                    >
+                        <div
+                            className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[64%] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#a8abce] to-[#a9afde] opacity-10"
+                            style={{
+                                clipPath:
+                                    'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%, 45.2% 34.5%)',
+                            }}
+                        />
                     </div>
-                    <hr className='border-gray-300 w-full' />
+
+                    <div className="mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md">
+                        <div className='flex flex-row justify-center'>
+                            <h1 className='px-4 py-4 w-full text-2xl font-semibold text-center text-black'>Edit Profile</h1>
+                        </div>
+                        <hr className='border-gray-300 w-full' />
+                    </div>
+
+                    <div className="mt-10 mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md px-6 pb-8 lg:px-8 ">
+                        <form className="space-y-6" onSubmit={handleEditProfile}>
+                            <div>
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    Email ID
+                                </label>
+                                <div className="mt-2">
+                                    <input
+                                        type="email"
+                                        autoComplete="email"
+                                        disabled
+                                        defaultValue={userEmail}
+                                        placeholder='Enter your Email ID'
+                                        onChange={(e) => setUserEmail(e.target.value.toLowerCase())}
+                                        className={"block text-lg w-full rounded-md py-2 px-2 shadow-sm ring-1 ring-inset ring-bGray text-gray-400 italic sm:text-md sm:leading-6 !outline-none"}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    Roll Number
+                                </label>
+                                <div className="mt-2">
+                                    <input
+                                        type="text"
+                                        autoComplete="rollno"
+                                        defaultValue={userRollNumber}
+                                        disabled
+                                        className={"block text-lg w-full rounded-md py-2 px-2 shadow-sm ring-1 ring-inset ring-bGray text-gray-400 italic sm:text-md sm:leading-6 !outline-none"}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    Full Name
+                                </label>
+                                <div className="mt-2">
+                                    <input
+                                        type="text"
+                                        autoComplete="name"
+                                        placeholder='Enter your full name'
+                                        defaultValue={userFullName}
+                                        disabled
+                                        className={"block text-lg w-full rounded-md py-2 px-2 shadow-sm ring-1 ring-inset ring-bGray text-gray-400 italic sm:text-md sm:leading-6 !outline-none"}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    Mobile Number
+                                </label>
+                                <div className="mt-2">
+                                    <input
+                                        type="number"
+                                        autoComplete="name"
+                                        placeholder='Enter your Mobile Number'
+                                        defaultValue={userPhone}
+                                        onChange={(e) => setUserPhone(e.target.value)}
+                                        className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
+                                            (!isValidPhone && userPhone ? ' ring-red-500' : isValidPhone && userPhone ? ' ring-green-500' : ' ring-bGray')}
+                                        required
+                                    />
+                                </div>
+                            </div>
+
+                            <div>
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    Need Accomodation?
+                                </label>
+                                <div className="mt-2">
+                                    {/* Select Input Yes/No */}
+                                    <select
+                                        className="block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none"
+                                        onChange={(e) => {
+                                            if (e.target.value === "0") {
+                                                setNumberOfDays("2");
+                                                setTheDay("0");
+                                            }
+                                            setNeedAccomodation(e.target.value);
+                                        }}
+                                        value={needAccomodation}
+                                        required
+                                    >
+                                        <option value={"0"}>No</option>
+                                        <option value={"1"}>Yes</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            {needAccomodation === "1" ?
+                                // No of Days
+                                <div>
+                                    <label className="block text-md font-medium leading-6 text-black">
+                                        Number of Days
+                                    </label>
+                                    <div className="mt-2">
+                                        {/* Select Input Yes/No */}
+                                        <select
+                                            className="block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none"
+                                            defaultValue={numberOfDays}
+                                            onChange={(e) => {
+                                                setNumberOfDays(e.target.value);
+                                            }}
+                                            required
+                                        >
+                                            <option value={"2"}>2</option>
+                                            <option value={"1"}>1</option>
+                                        </select>
+                                    </div>
+                                </div>
+
+                                : null}
+
+                            {needAccomodation === "1" && numberOfDays === "1" ?
+                                // Day One?
+                                [
+                                    <div key={0}>
+                                        <label className="block text-md font-medium leading-6 text-black">
+                                            Which Day?
+                                        </label>
+                                        <div className="mt-2">
+                                            {/* Select Input Yes/No */}
+                                            <select
+                                                className="block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none"
+                                                onChange={(e) => setTheDay(e.target.value)}
+                                                defaultValue={theDay}
+                                                required
+                                            >
+                                                <option value={"0"}>Feb 16th, 2024</option>
+                                                <option value={"1"}>Feb 17th, 2024</option>
+                                            </select>
+                                        </div>
+                                    </div>
+                                ] : null}
+
+
+                            {needAccomodation === "1" && numberOfDays === "2" ?
+                                <div className="bg-gray-100 p-2 rounded-xl">
+                                    <p className="text-md font-bold mb-2">Accomodation Info</p>
+                                    <p>Feb 16th, 2024</p>
+                                    <p>Feb 17th, 2024</p>
+                                </div> : needAccomodation === "1" && numberOfDays === "1" && theDay === "0" ? <div className="bg-gray-200 p-2 rounded-xl">
+                                    <p className="text-md font-bold mb-2">Accomodation Info</p>
+                                    <p>Feb 16th, 2024</p>
+                                </div> : needAccomodation === "1" && numberOfDays === "1" && theDay === "1" ? <div className="bg-gray-200 p-2 rounded-xl">
+                                    <p className="text-md font-bold mb-2">Accomodation Info</p>
+                                    <p>Feb 17th, 2024</p>
+                                </div> : null
+                            }
+
+                            <div>
+                                {isLoading == false ? (<input
+                                    value="Update my Profile"
+                                    type="submit"
+                                    disabled={(!isValidName || !isValidPhone || !isValidNeedAccomodation)}
+                                    className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />) : (<input
+                                        value="Loading..."
+                                        type="submit"
+                                        disabled={true}
+                                        className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />)}
+                            </div>
+                        </form>
+                    </div>
                 </div>
 
-                <div className="mt-10 mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md px-6 pb-8 lg:px-8 ">
-                    <form className="space-y-6" onSubmit={handleEditProfile}>
-                        <div>
-                            <label className="block text-md font-medium leading-6 text-black">
-                                Email ID
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="email"
-                                    autoComplete="email"
-                                    disabled
-                                    defaultValue={userEmail}
-                                    placeholder='Enter your Email ID'
-                                    onChange={(e) => setUserEmail(e.target.value.toLowerCase())}
-                                    className={"block text-lg w-full rounded-md py-2 px-2 shadow-sm ring-1 ring-inset ring-bGray text-gray-400 italic sm:text-md sm:leading-6 !outline-none"}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-md font-medium leading-6 text-black">
-                                Roll Number
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="text"
-                                    autoComplete="rollno"
-                                    defaultValue={userRollNumber}
-                                    disabled
-                                    className={"block text-lg w-full rounded-md py-2 px-2 shadow-sm ring-1 ring-inset ring-bGray text-gray-400 italic sm:text-md sm:leading-6 !outline-none"}                                    
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-md font-medium leading-6 text-black">
-                                Full Name
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="text"
-                                    autoComplete="name"
-                                    placeholder='Enter your full name'
-                                    defaultValue={userFullName}
-                                    onChange={(e) => setUserFullName(e.target.value.toString())}
-                                    className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
-                                        (!isValidName && userFullName ? ' ring-red-500' : isValidName && userFullName ? ' ring-green-500' : ' ring-bGray')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <label className="block text-md font-medium leading-6 text-black">
-                                Mobile Number
-                            </label>
-                            <div className="mt-2">
-                                <input
-                                    type="number"
-                                    autoComplete="name"
-                                    placeholder='Enter your Mobile Number'
-                                    defaultValue={userPhone}
-                                    onChange={(e) => setUserPhone(e.target.value)}
-                                    className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
-                                        (!isValidPhone && userPhone ? ' ring-red-500' : isValidPhone && userPhone ? ' ring-green-500' : ' ring-bGray')}
-                                    required
-                                />
-                            </div>
-                        </div>
-
-                        <div>
-                            <input
-                                value="Update my Profile"
-                                type="submit"
-                                disabled={(!isValidName || !isValidPhone) && buttonState}
-                                className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
-                        </div>
-                    </form>
-                </div>
-            </div>
-
-            <DialogModal 
-                isOpen={isOpen}
-                closeModal={closeModal}
-                title={title}
-                message={message}
-                buttonLabel={buttonLabel}
-            />
-        </main>
+                <DialogModal
+                    isOpen={isOpen}
+                    closeModal={closeModal}
+                    title={title}
+                    message={message}
+                    buttonLabel={buttonLabel}
+                />
+            </main>
         </>
     );
 }

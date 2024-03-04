@@ -11,7 +11,7 @@ export default function PaymentSuccess() {
                     <i className="material-icons text-green-500" style={{"fontSize": "128px"}}>verified</i>
                 </div>
                 <h1 className="mt-8 text-center justify-center text-4xl fonr-bold">Payment Successful</h1>
-                <p className="text-gray-700 text-sm text-center">Please allow us up to 5 minutes to receive confirmation of your payment.</p>
+                <p className="text-gray-700 text-sm text-center">Head over to your profile to see the receipt.</p>
             </>
 
             <Link href={"/"} className="flex justify-center">

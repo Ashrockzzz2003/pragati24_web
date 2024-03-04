@@ -35,7 +35,7 @@ export default function FPVerifyScreen() {
     const isValidPassword = (userPassword.length >= 8 && userConfirmPassword.length >= 8 && userPassword === userConfirmPassword);
     const isValidOtp = validator.isNumeric(userOtp.join('')) && (userOtp.join('')).length === 6;
 
-    const [buttonState, setButtonState] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const buildDialog = (title, message, buttonLabel) => {
         setTitle(title);
@@ -52,7 +52,7 @@ export default function FPVerifyScreen() {
             return;
         }
 
-        setButtonState(false);
+        setIsLoading(true);
 
         try {
 
@@ -100,7 +100,7 @@ export default function FPVerifyScreen() {
             buildDialog('Error', 'Something went wrong, please try again later', 'Okay');
             openModal();
         } finally {
-            setButtonState(true);
+            setIsLoading(false);
         }
     }
 
@@ -114,7 +114,7 @@ export default function FPVerifyScreen() {
     return (
         <>
         <NavBar />
-        <main className="flex h-[90vh] flex-1 flex-col justify-center">
+        <main className="flex h-[90vh] flex-1 flex-col justify-center mt-32 md:mt-4">
             <div className="border border-gray-300 rounded-2xl mx-auto w-11/12 sm:max-w-11/12 md:max-w-md lg:max-w-md backdrop-blur-xl bg-gray-50">
                 <div
                     className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
@@ -214,11 +214,17 @@ export default function FPVerifyScreen() {
                         </div>
 
                         <div>
-                            <input
+                            {isLoading == false ? (<input
                                 value="Reset Password"
                                 type="submit"
-                                disabled={(!isValidOtp || !isValidPassword) && buttonState}
+                                disabled={(!isValidOtp || !isValidPassword)}
+                                className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />) : (
+                                    <input
+                                value="Loading..."
+                                type="submit"
+                                disabled={true}
                                 className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
+                                )}
                         </div>
                     </form>
                 </div>

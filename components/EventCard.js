@@ -25,7 +25,7 @@ export default function EventCard({
 }) {
     // For The AlertDialogModal
 
-    return <div className={"border flex flex-col rounded-xl backdrop-blur-xl bg-gray-50 w-72"} >
+    return <div className={"border flex flex-col rounded-xl backdrop-blur-xl bg-gray-50 w-74"} >
         {/* <div className="bg-gray-100 rounded-lg flex flex-row py-2 px-1 justify-between items-center hover:bg-opacity-80 cursor-pointer">
             <span className="material-icons">call</span>
             <p className="text-sm text-gray-500 py-1 px-1 text-center">{contactName} | {contactNumber}</p>
@@ -80,11 +80,11 @@ export default function EventCard({
         </div>
         <hr className="border-gray-300 w-full" />
         <div className="bg-green-100 text-[#0f3d0f] flex flex-row rounded-lg py-2 px-1 justify-between items-center hover:bg-opacity-80 cursor-pointer">
-            <span className="material-icons">group</span>
+            {/* <span className="material-icons">group</span> */}
             {hasRegistered === true ? (
                 <p className="text-sm text-green-100 bg-[#0f3d0f] rounded-lg py-1 px-1">Registered</p>
             ) : (noOfRegistrations >= maxRegistrationCount) ? (
-                <p className="text-sm text-red-100 bg-[#3d0f0f] rounded-lg py-1 px-1">Registrations Closed</p>
+                <p className="text-sm text-red-100 bg-[#3d0f0f] rounded-lg py-1 px-1">Online Registrations Closed</p>
             ) : null}
 
             {minSize === maxSize ? (

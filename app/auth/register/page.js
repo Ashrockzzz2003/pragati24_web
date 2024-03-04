@@ -34,16 +34,26 @@ export default function RegisterScreen() {
     const [userPassword, setUserPassword] = useState('');
     const [userConfirmPassword, setUserConfirmPassword] = useState('');
     const [userPhone, setUserPhone] = useState('');
-
+    const [collegeName, setCollegeName] = useState('');
+    const [collegeCity, setCollegeCity] = useState('');
+    const [academicYear, setAcademicYear] = useState(0);
+    const [degree, setDegree] = useState('');
+    const [needAccomodation, setNeedAccomodation] = useState("0");
+    const [numberOfDays, setNumberOfDays] = useState("2");
+    const [theDay, setTheDay] = useState("0");
 
     const isValidPassword = (userPassword.length >= 8 && userConfirmPassword.length >= 8 && userPassword === userConfirmPassword);
-    const rollNumberRegex = /^[a-zA-Z0-9.]+$/;
-    const isValidRollNumber = rollNumberRegex.test(userRollNumber) && userRollNumber.length === 16;
+    const isValidRollNumber = userRollNumber.length > 0;
     const isValidName = validator.isAlpha(userFullName.replace(/\s/g, ''));
     const isValidEmail = validator.isEmail(userEmail);
     const isValidPhone = validator.isMobilePhone(userPhone, 'en-IN');
+    const isValidCollegeName = collegeName.length > 0;
+    const isValidCollegeCity = collegeCity.length > 0;
+    const isValidAcademicYear = validator.isNumeric(academicYear.toString()) && academicYear > 0;
+    const isValidDegree = degree.length > 0;
+    const isValidNeedAccomodation = (needAccomodation === "0") || (needAccomodation === "1" && numberOfDays === "1" && theDay === "0") || (needAccomodation === "1" && numberOfDays === "1" && theDay === "1") || (needAccomodation === "1" && numberOfDays === "2");
 
-    const [buttonState, setButtonState] = useState(true);
+    const [isLoading, setIsLoading] = useState(false);
 
     const buildDialog = (title, message, buttonLabel) => {
         setTitle(title);
@@ -60,8 +70,24 @@ export default function RegisterScreen() {
             return;
         }
 
-        setButtonState(false);
+        if (!isValidCollegeName || !isValidCollegeCity || !isValidAcademicYear || !isValidDegree) {
+            buildDialog('Invalid College Name or College City or Academic Year or Degree', 'Please enter valid details to continue', 'Okay');
+            openModal();
+            return;
+        }
 
+        if (!isValidNeedAccomodation) {
+            buildDialog('Invalid Accomodation Details', 'Please enter valid accomodation details to continue', 'Okay');
+            openModal();
+            return;
+        }
+
+        if (needAccomodation === "1" && !confirm("Accomodation will be provided only if you register for events. Continue?")) {
+            return;
+        }
+
+        setIsLoading(true);
+        
         try {
 
             const response = await fetch(REGISTER_URL, {
@@ -70,17 +96,24 @@ export default function RegisterScreen() {
                     'Content-Type': 'application/json'
                 },
                 body: JSON.stringify({
-                    userEmail: userEmail,
-                    userFullName: userFullName,
+                    userEmail: userEmail.trim(),
+                    userFullName: userFullName.trim(),
                     userPassword: hashPassword(userPassword),
-                    userPhone: userPhone,
-                    userRollNumber: userRollNumber
+                    userPhone: userPhone.trim(),
+                    userRollNumber: userRollNumber.trim(),
+                    collegeName: collegeName.trim(),
+                    collegeCity: collegeCity.trim(),
+                    academicYear: academicYear,
+                    degree: degree.trim(),
+                    needAccomodation: needAccomodation,
+                    numberOfDays: numberOfDays,
+                    theDay: theDay
                 })
             });
 
             if (response.status === 200) {
                 const data = await response.json();
-                
+
                 secureLocalStorage.clear();
 
                 secureLocalStorage.setItem('pragathi-rt', data["token"]);
@@ -106,7 +139,7 @@ export default function RegisterScreen() {
             buildDialog('Error', 'Something went wrong, please try again later', 'Okay');
             openModal();
         } finally {
-            setButtonState(true);
+            setIsLoading(false);
         }
     }
 
@@ -118,25 +151,17 @@ export default function RegisterScreen() {
         setUserPhone('');
         setUserRollNumber('');
         setUserConfirmPassword('');
+        setCollegeName('');
+        setCollegeCity('');
+        setAcademicYear(0);
+        setDegree('');
     }, []);
 
-    return (
-        <>
+    return <>
         <NavBar />
-        <main className="flex h-[90vh] flex-1 flex-col justify-center">
+        <main className="flex flex-1 flex-col justify-center mt-32 md:mt-4">
             <div className="border border-gray-300 rounded-2xl mx-auto w-11/12 sm:max-w-11/12 md:max-w-md lg:max-w-md backdrop-blur-xl bg-gray-50">
-                <div
-                    className="absolute inset-x-0 -top-10 -z-10 transform-gpu overflow-hidden blur-2xl"
-                    aria-hidden="true"
-                >
-                    <div
-                        className="relative left-[calc(50%-11rem)] aspect-[1155/678] w-[64%] -translate-x-1/2 rotate-[30deg] bg-gradient-to-tr from-[#a8abce] to-[#a9afde] opacity-10"
-                        style={{
-                            clipPath:
-                                'polygon(74.1% 44.1%, 100% 61.6%, 97.5% 26.9%, 85.5% 0.1%, 80.7% 2%, 72.5% 32.5%, 60.2% 62.4%, 52.4% 34.5%, 27.5% 76.7%, 0.1% 64.9%, 17.9% 100%, 27.6% 76.8%, 76.1% 97.7%, 74.1% 44.1%, 45.2% 34.5%)',
-                        }}
-                    />
-                </div>
+
 
                 <div className="mx-auto w-full sm:max-w-11/12 md:max-w-md lg:max-w-md">
                     <div className='flex flex-row justify-center'>
@@ -250,23 +275,178 @@ export default function RegisterScreen() {
                             </div>
                         </div>
 
+                        <div>
+                            <label className="block text-md font-medium leading-6 text-black">
+                                College Name
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    autoComplete="name"
+                                    placeholder='Enter your college Name'
+                                    onChange={(e) => setCollegeName(e.target.value.toString())}
+                                    className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
+                                        (!isValidCollegeName && collegeName ? ' ring-red-500' : isValidCollegeName && collegeName ? ' ring-green-500' : ' ring-bGray')}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-md font-medium leading-6 text-black">
+                                College City
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    autoComplete="name"
+                                    placeholder='(eg.) Coimbatore'
+                                    onChange={(e) => setCollegeCity(e.target.value.toString())}
+                                    className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
+                                        (!isValidCollegeCity && collegeCity ? ' ring-red-500' : isValidCollegeCity && collegeCity ? ' ring-green-500' : ' ring-bGray')}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-md font-medium leading-6 text-black">
+                                Academic Year
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="number"
+                                    autoComplete="name"
+                                    placeholder='(eg.) 2 for second year.'
+                                    onChange={(e) => setAcademicYear(e.target.value)}
+                                    className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
+                                        (!isValidAcademicYear && academicYear ? ' ring-red-500' : isValidAcademicYear && academicYear ? ' ring-green-500' : ' ring-bGray')}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-md font-medium leading-6 text-black">
+                                Degree
+                            </label>
+                            <div className="mt-2">
+                                <input
+                                    type="text"
+                                    autoComplete="name"
+                                    placeholder='Enter your degree in college (eg. MBA)'
+                                    onChange={(e) => setDegree(e.target.value.toString())}
+                                    className={"block text-lg w-full rounded-md py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none" +
+                                        (!isValidDegree && degree ? ' ring-red-500' : isValidDegree && degree ? ' ring-green-500' : ' ring-bGray')}
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div>
+                            <label className="block text-md font-medium leading-6 text-black">
+                                Need Accomodation?
+                            </label>
+                            <div className="mt-2">
+                                {/* Select Input Yes/No */}
+                                <select
+                                    className="block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none"
+                                    onChange={(e) => {
+                                        if (e.target.value === "0") {
+                                            setNumberOfDays("2");
+                                            setTheDay("0");
+                                        }
+                                        setNeedAccomodation(e.target.value);
+                                    }}
+                                    required
+                                >
+                                    <option value={"0"}>No</option>
+                                    <option value={"1"}>Yes</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        {needAccomodation === "1" ?
+                            // No of Days
+                            <div>
+                                <label className="block text-md font-medium leading-6 text-black">
+                                    Number of Days
+                                </label>
+                                <div className="mt-2">
+                                    {/* Select Input Yes/No */}
+                                    <select
+                                        className="block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none"
+                                        onChange={(e) => {
+                                            setNumberOfDays(e.target.value);
+                                        }}
+                                        required
+                                    >
+                                        <option value={"2"}>2</option>
+                                        <option value={"1"}>1</option>
+                                    </select>
+                                </div>
+                            </div>
+
+                            : null}
+
+                        {needAccomodation === "1" && numberOfDays === "1" ?
+                            // Day One?
+                            [
+                                <div key={0}>
+                                    <label className="block text-md font-medium leading-6 text-black">
+                                        Which Day?
+                                    </label>
+                                    <div className="mt-2">
+                                        {/* Select Input Yes/No */}
+                                        <select
+                                            className="block text-lg w-full rounded-md border-0 py-2 px-2 text-black shadow-sm ring-1 ring-inset ring-bGray placeholder:text-gray-400 sm:text-md sm:leading-6 !outline-none"
+                                            onChange={(e) => setTheDay(e.target.value)}
+                                            required
+                                        >
+                                            <option value={"0"}>Feb 16th, 2024</option>
+                                            <option value={"1"}>Feb 17th, 2024</option>
+                                        </select>
+                                    </div>
+                                </div>
+                            ] : null}
+
+
+                        {needAccomodation === "1" && numberOfDays === "2" ?
+                            <div className="bg-gray-100 p-2 rounded-xl">
+                                <p className="text-md font-bold mb-2">Accomodation Info</p>
+                                <p>Feb 16th, 2024</p>
+                                <p>Feb 17th, 2024</p>
+                            </div> : needAccomodation === "1" && numberOfDays === "1" && theDay === "0" ? <div className="bg-gray-200 p-2 rounded-xl">
+                                <p className="text-md font-bold mb-2">Accomodation Info</p>
+                                <p>Feb 16th, 2024</p>
+                            </div> : needAccomodation === "1" && numberOfDays === "1" && theDay === "1" ? <div className="bg-gray-200 p-2 rounded-xl">
+                                <p className="text-md font-bold mb-2">Accomodation Info</p>
+                                <p>Feb 17th, 2024</p>
+                            </div> : null
+                        }
+
+
                         <p className="mt-10 text-center text-md text-gray-500">
                             {"Already have an account? "}
                             <Link className="font-medium leading-6 text-blue-600 hover:underline" href="/auth/login">Login</Link>
                         </p>
 
                         <div>
-                            <input
+                            {isLoading == false ? (<input
                                 value="Register"
                                 type="submit"
-                                disabled={(!isValidEmail || !isValidPassword || !isValidName || !isValidPhone || !isValidRollNumber) && buttonState}
-                                className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />
+                                disabled={(!isValidEmail || !isValidPassword || !isValidName || !isValidPhone || !isValidRollNumber || !isValidCollegeName || !isValidCollegeCity || !isValidAcademicYear || !isValidDegree || !isValidNeedAccomodation)}
+                                className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />) : (<input
+                                    type="submit"
+                                    value="Loading..."
+                                    disabled={true}
+                                    className={"w-full text-lg rounded-lg bg-black text-white p-2 cursor-pointer disabled:bg-gray-400 disabled:cursor-not-allowed"} />)}
                         </div>
                     </form>
                 </div>
             </div>
 
-            <DialogModal 
+            <DialogModal
                 isOpen={isOpen}
                 closeModal={closeModal}
                 title={title}
@@ -274,6 +454,5 @@ export default function RegisterScreen() {
                 buttonLabel={buttonLabel}
             />
         </main>
-        </>
-    );
+    </>;
 }

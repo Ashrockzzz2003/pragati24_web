@@ -8,13 +8,15 @@
     "start": "next start",
     "lint": "next lint",
     "postinstall": "npm run download-webviewer",
-    "download-webviewer": "npx @pdftron/webviewer-downloader"
+    "download-webviewer": "npx @pdftron/webviewer-downloader",
+    "deploy": "pm2 start 'npm run start' --name pragati_web_app"
   },
   "dependencies": {
     "@headlessui/react": "^1.7.17",
     "@heroicons/react": "^2.1.1",
     "@material-tailwind/react": "^2.1.8",
     "@pdftron/webviewer": "^10.6.0",
+    "aos": "^2.3.4",
     "material-icons": "^1.13.12",
     "next": "^14.0.4",
     "react": "^18.2.0",

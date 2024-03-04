@@ -6,6 +6,7 @@ import { USER_TRANSACTIONS_URL } from "@/components/constants";
 import { useRouter } from "next/navigation";
 import { useEffect, useState } from "react";
 import secureLocalStorage from "react-secure-storage";
+import Link from "next/link";
 
 
 export default function TransactionsScreen() {
@@ -96,7 +97,7 @@ export default function TransactionsScreen() {
             </div>
 
             <div className="flex flex-col bg-gray-50 bg-opacity-70 rounded-xl p-4 w-fit ml-auto mr-auto mt-4">
-                <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"It will take up to 5 mins to process your payments. Please wait patiently and come back after 5 mins to see the status here."}</p>
+                <p className="text-sm font-medium text-gray-700 max-w-[256px] text-center">{"Click on Verify Now to verify your transactions if the option is shown."}</p>
             </div>
 
             <h1 className="mb-8 pt-8 text-2xl text-lime-50 text-center">My Transactions</h1>
@@ -125,7 +126,7 @@ export default function TransactionsScreen() {
                                     ) : transaction.transactionStatus === '2' ? (
                                         <span className="text-[#3c1414] bg-[#ffcbcb] p-2 rounded-xl my-4">Failed</span>
                                     ) : (
-                                        <span className="text-[#383812] bg-[#fdff85] p-2 rounded-xl my-4">Processing</span>
+                                        <Link href={`/event/register/verify/${transaction.txnid}`}><span className="text-[#383812] bg-[#fdff85] p-2 rounded-xl my-4">Verify Now</span></Link>
                                     )}
                                 </td>
                             </tr>
