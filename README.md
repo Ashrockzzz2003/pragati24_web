@@ -1,6 +1,6 @@
 # Pragati 2k24
 
-MBA Techfest Website.
+MBA Techfest Website Source Code.
 
 ## Tech Stack
 
