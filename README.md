@@ -1,5 +1,7 @@
 # Pragati 2k24
 
+<img src="https://github.com/Ashrockzzz2003/pragati24_web/assets/90165751/0869ceee-4c81-4e40-94f1-cf72c0e95d78" style="height: 96px;" />
+
 MBA Techfest Website Source Code.
 
 ## Tech Stack
