@@ -8,6 +8,9 @@ MBA Techfest Website Source Code.
 
 <!-- [Link to BackEnd GitHub Repository](https://github.com/Ashrockzzz2003/pragati_backend_2024) -->
 
+> [!Note]
+> Backend Code is not open source due to security policy.
+
 | Purpose | Tech |
 | --- | --- |
 | Backend | `ExpressJS`, `MySQL` |
