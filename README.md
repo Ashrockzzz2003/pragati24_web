@@ -73,6 +73,9 @@ MBA Techfest Website Source Code.
 
 ![image](https://github.com/Ashrockzzz2003/pragati24_web/assets/90165751/b46e2299-efd6-47e4-9225-e43fcb3d0c20)
 
+## Note
+
+> Payment credentials have not been uploaded due to security policy.
 
 ## Installation
 
