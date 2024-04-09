@@ -6,7 +6,7 @@ MBA Techfest Website Source Code.
 
 ## Tech Stack
 
-[Link to BackEnd GitHub Repository](https://github.com/Ashrockzzz2003/pragati_backend_2024)
+<!-- [Link to BackEnd GitHub Repository](https://github.com/Ashrockzzz2003/pragati_backend_2024) -->
 
 | Purpose | Tech |
 | --- | --- |
